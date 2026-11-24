@@ -167,7 +167,7 @@ ESP32_PULSO_SEGREDO=     # assina o token de cada botão cadastrado no Admin
 
 - [x] `.env.example` com todos os nomes
 - [ ] `.env.local` preenchido (feito: `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET` · falta: PDF, AWS, Resend, métricas, ESP32)
-- [ ] Mesmas variáveis na Vercel
+- [ ] Mesmas variáveis na Vercel (feito: `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET` como Secret em Production e Preview · falta: as demais, junto com os serviços)
 
 ---
 
@@ -337,7 +337,8 @@ Crie `CLAUDE.md` na raiz com o contexto que o Claude precisa em toda sessão:
 ```
 
 - [x] `CLAUDE.md` criado (importa o `AGENTS.md`, que aponta para a documentação do Next 16 em `node_modules/next/dist/docs`)
-- [ ] Conector Atlassian autorizado no Claude Code (`/mcp`)
+- [ ] Conector Atlassian autorizado no Claude Code (`/mcp`) — não é mais necessário: o Jira é acessado pela REST API (`scripts/harness/jira.mjs`)
+- [x] Harness de cards (um chat por fase, comandos `/iniciar-card` … `/publicar-pr`): guia em `docs/harness/README.md`
 
 ---
 

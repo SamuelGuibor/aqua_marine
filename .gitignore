@@ -27,7 +27,7 @@ yarn-error.log*
 
 # env files: segredos ficam no .env.local; só o .env.example é versionado
 .env*
-!.env.example
+.env.example
 
 # vercel
 .vercel
@@ -35,3 +35,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# harness de cards (docs/harness): worktrees locais e relatórios de fase
+/.worktrees/
+.card/
