@@ -84,7 +84,7 @@ aws configure   # só se ainda não estiver configurado; região sa-east-1
 ```
 
 - [x] Todas as CLIs respondem `--version`
-- [ ] Todas logadas (feito: `gh`, `neonctl` · falta: `vercel` (login expirado), `railway`, `aws configure`)
+- [ ] Todas logadas (feito: `gh`, `neonctl`, `vercel` · falta: `railway`, `aws configure`)
 - [x] Extensões instaladas (a do PlatformIO baixa o toolchain do ESP32 na primeira abertura)
 
 ---
@@ -123,9 +123,9 @@ Regras do repositório:
 
 > **Atenção ao `.gitignore`:** ele ignora `.env*.local`, mas **não** ignora `.env`. Guarde os segredos em `.env.local` e versione só o `.env.example`.
 
-- [x] Next atualizado e `npm run build` passando (branch `setup/atualizar-next`, ainda sem PR)
-- [ ] Pastas criadas, `main` protegida
-- [ ] `.env.example` versionado, `.env.local` fora do Git
+- [x] Next atualizado e `npm run build` passando (PR #1)
+- [ ] Pastas criadas, `main` protegida (pastas criadas · `main` ainda sem proteção; repositório fica público por enquanto, decidido em 24/11)
+- [x] `.env.example` versionado, `.env.local` fora do Git (o `.gitignore` agora ignora todo `.env*`, menos o `.env.example`)
 
 ---
 
@@ -165,8 +165,8 @@ SENTRY_AUTH_TOKEN=       # só no build (upload de source maps)
 ESP32_PULSO_SEGREDO=     # assina o token de cada botão cadastrado no Admin
 ```
 
-- [ ] `.env.example` com todos os nomes
-- [ ] `.env.local` preenchido
+- [x] `.env.example` com todos os nomes
+- [ ] `.env.local` preenchido (feito: `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET` · falta: PDF, AWS, Resend, métricas, ESP32)
 - [ ] Mesmas variáveis na Vercel
 
 ---
@@ -175,15 +175,15 @@ ESP32_PULSO_SEGREDO=     # assina o token de cada botão cadastrado no Admin
 
 **Neon**
 
-1. Criar o projeto `aquapulse` na região de São Paulo.
-2. Criar a branch `dev` a partir de `main`: você desenvolve na `dev`; a `main` é produção.
+1. Criar o projeto `aquapulse` na região de São Paulo. *(Feito: projeto `aquamarine`, `aws-sa-east-1`.)*
+2. ~~Criar a branch `dev` a partir de `main`~~ *Decidido em 24/11: uma branch só (`production`), usada também no desenvolvimento.*
 3. As migrations ficam no repositório (Drizzle) e rodam com `DATABASE_URL_UNPOOLED`.
 
 **Vercel**
 
-1. *Add New → Project* → importar `SamuelGuibor/aqua_marine`.
+1. *Add New → Project* → importar `SamuelGuibor/aqua_marine`. *(Feito: projeto `aqua-marine` já gera preview a cada PR.)*
 2. *Integrations* → adicionar **Neon**: cada PR ganha uma branch do banco só para o preview.
-3. *Settings → Functions* → região **São Paulo (gru1)**, perto do banco.
+3. *Settings → Functions* → região **São Paulo (gru1)**, perto do banco. *(Feito no código: `"regions": ["gru1"]` no `vercel.json`.)*
 4. O endereço de produção fica `aquapulse.vercel.app` (ou o nome livre mais próximo).
 
 - [ ] Primeiro deploy da `main` no ar
@@ -336,7 +336,7 @@ Crie `CLAUDE.md` na raiz com o contexto que o Claude precisa em toda sessão:
 - Tema escuro do protótipo; nada de cor nova sem motivo.
 ```
 
-- [ ] `CLAUDE.md` criado
+- [x] `CLAUDE.md` criado (importa o `AGENTS.md`, que aponta para a documentação do Next 16 em `node_modules/next/dist/docs`)
 - [ ] Conector Atlassian autorizado no Claude Code (`/mcp`)
 
 ---
@@ -346,9 +346,9 @@ Crie `CLAUDE.md` na raiz com o contexto que o Claude precisa em toda sessão:
 - [ ] Contas criadas (passo 2) e CLIs logadas (passo 3)
 - [ ] Next atualizado, build passando, `main` protegida (passo 4)
 - [ ] `.env.local` e variáveis na Vercel (passo 5)
-- [ ] Neon com `main` e `dev`, primeiro deploy na Vercel (passo 6)
+- [ ] Neon com uma branch só (decidido em 24/11), primeiro deploy na Vercel (passo 6)
 - [ ] S3 com backup noturno testado (passo 7)
 - [ ] PDF, e-mail e métricas respondendo (passo 8)
 - [ ] Um tablet com o PWA instalado e depuração USB funcionando (passo 9)
 - [ ] Jira com fluxo, versões, formulário de demanda e backlog criado (passo 10)
-- [ ] `CLAUDE.md` no repositório (passo 11)
+- [x] `CLAUDE.md` no repositório (passo 11)
