@@ -17,13 +17,14 @@ import {
   text,
   time,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
 // Enums
-// Só `papel_usuario` é usado por coluna nesta migration; os demais já nascem
-// aqui para as tabelas dos próximos cards.
+// Todos foram criados na migration 0001, inclusive os que só ganham coluna nas
+// tabelas dos próximos cards.
 // ---------------------------------------------------------------------------
 
 export const papelUsuario = pgEnum("papel_usuario", ["rh", "admin"]);
@@ -276,9 +277,9 @@ export const registroAcao = pgTable(
     usuarioId: uuid("usuario_id").references(() => usuario.id, {
       onDelete: "restrict",
     }),
-    // Sem chave estrangeira por enquanto: a tabela `tablet` e a FK entram na
-    // migration 0002 (SCRUM-36).
-    tabletId: uuid("tablet_id"),
+    tabletId: uuid("tablet_id").references((): AnyPgColumn => tablet.id, {
+      onDelete: "restrict",
+    }),
     acao: text("acao").notNull(),
     entidade: text("entidade"),
     entidadeId: text("entidade_id"),
@@ -294,5 +295,114 @@ export const registroAcao = pgTable(
       t.acao,
       t.ocorridoEm.desc().nullsFirst(),
     ),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// Tablets
+// ---------------------------------------------------------------------------
+
+/** Cadastro de um tablet da fábrica. Não se exclui: arquiva. */
+export const tablet = pgTable(
+  "tablet",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Aparece nos históricos como origem dos registros. */
+    nome: text("nome").notNull(),
+    modo: modoTablet("modo").notNull().default("setor"),
+    /** Obrigatório no modo `setor`. */
+    setorId: text("setor_id").references(() => setor.id, {
+      onDelete: "restrict",
+    }),
+    /** O que se digita no aparelho para vincular (`TAB-MONT-01`). */
+    codigo: text("codigo").notNull().unique(),
+    /** Número do código: sequência global, nunca reaproveitada. */
+    codigoSeq: integer("codigo_seq").notNull().unique(),
+    codigoGeradoEm: instante("codigo_gerado_em").notNull().defaultNow(),
+    criadoPor: uuid("criado_por")
+      .notNull()
+      .references(() => usuario.id, { onDelete: "restrict" }),
+    criadoEm: instante("criado_em").notNull().defaultNow(),
+    arquivadoEm: instante("arquivado_em"),
+  },
+  (t) => [
+    uniqueIndex("tablet_nome_ativo_idx")
+      .on(sql`lower(${t.nome})`)
+      .where(sql`${t.arquivadoEm} is null`),
+    index("tablet_setor_id_idx").on(t.setorId),
+    check(
+      "tablet_setor_id_check",
+      sql`${t.modo} <> 'setor' or ${t.setorId} is not null`,
+    ),
+  ],
+);
+
+/** Histórico dos aparelhos vinculados a cada cadastro. */
+export const tabletVinculo = pgTable(
+  "tablet_vinculo",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tabletId: uuid("tablet_id")
+      .notNull()
+      .references(() => tablet.id, { onDelete: "restrict" }),
+    /** SHA-256 do token; o token em claro só existe no aparelho. */
+    tokenHash: text("token_hash").notNull().unique(),
+    vinculadoEm: instante("vinculado_em").notNull().defaultNow(),
+    vinculadoPor: uuid("vinculado_por").references(() => usuario.id, {
+      onDelete: "restrict",
+    }),
+    userAgent: text("user_agent"),
+    appVersao: text("app_versao"),
+    ultimoAcessoEm: instante("ultimo_acesso_em"),
+    /** Nulo = vínculo ativo. */
+    revogadoEm: instante("revogado_em"),
+    revogadoMotivo: motivoRevogacao("revogado_motivo"),
+  },
+  (t) => [
+    // Um aparelho ativo por cadastro.
+    uniqueIndex("tablet_vinculo_ativo_idx")
+      .on(t.tabletId)
+      .where(sql`${t.revogadoEm} is null`),
+  ],
+);
+
+/** Evento (só INSERT): cada item recebido da fila de um tablet. */
+export const operacaoTablet = pgTable(
+  "operacao_tablet",
+  {
+    /** Id do item, gerado no aparelho. */
+    id: uuid("id").primaryKey(),
+    tabletId: uuid("tablet_id")
+      .notNull()
+      .references(() => tablet.id, { onDelete: "restrict" }),
+    vinculoId: uuid("vinculo_id")
+      .notNull()
+      .references(() => tabletVinculo.id, { onDelete: "restrict" }),
+    setorId: text("setor_id")
+      .notNull()
+      .references(() => setor.id, { onDelete: "restrict" }),
+    // `tipo`, `seq` e `ocorrido_em` vêm do aparelho e aceitam nulo: um item
+    // malformado também fica guardado.
+    tipo: text("tipo"),
+    seq: bigint("seq", { mode: "number" }),
+    ocorridoEm: instante("ocorrido_em"),
+    recebidoEm: instante("recebido_em").notNull().defaultNow(),
+    resultado: resultadoOperacao("resultado").notNull(),
+    motivoRejeicao: text("motivo_rejeicao"),
+    /** O item como chegou. */
+    payload: jsonb("payload").notNull(),
+    resolvidaEm: instante("resolvida_em"),
+    resolvidaPor: uuid("resolvida_por").references(() => usuario.id, {
+      onDelete: "restrict",
+    }),
+  },
+  (t) => [
+    index("operacao_tablet_tablet_id_recebido_em_idx").on(
+      t.tabletId,
+      t.recebidoEm.desc().nullsFirst(),
+    ),
+    index("operacao_tablet_rejeitada_pendente_idx")
+      .on(t.resultado)
+      .where(sql`${t.resultado} = 'rejeitada' and ${t.resolvidaEm} is null`),
   ],
 );
