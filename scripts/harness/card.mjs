@@ -8,6 +8,9 @@ import {
   Falha, PASTA_CARD, PASTA_WORKTREES, PROJETO, STATUS, api, branchDoCard, buscarCard, chaveDoCard, git,
   lerArgs, moverCard, pastaPrincipal, principal, slug, urlDoCard, worktreeDoCard,
 } from './lib.mjs';
+import {
+  compararComMescla, escolherPr, motivoParaNaoEncerrar, proximoPasso, relatorioVale, trazerCommitDoPr,
+} from './fluxo.mjs';
 
 const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, branch ${PROJETO}-xx-titulo, relatórios em ${PASTA_CARD}/.
 
@@ -17,6 +20,7 @@ const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, b
                                   copia o .env.local, roda npm ci, atribui o card e move para "${STATUS.fazendo}"
   encerrar ${PROJETO}-12 [--confirmar] depois do PR mesclado: remove worktree e branch local, atualiza a main,
                                   move o card para "${STATUS.pronto}". Sem --confirmar só mostra o que faria.
+                                  Recusa se houver commit do card que não entrou em PR mesclado.
 
 Opções: --sem-jira (não lê nem altera o Jira) · --sem-instalar (pula o npm ci) · --sem-fetch
         encerrar --abandonar (descarta um card que NÃO foi mesclado; apaga o trabalho local)`;
@@ -41,24 +45,16 @@ function cabecalho(arquivo) {
   return campos;
 }
 
-/**
- * O relatório ainda vale para o HEAD? Vale se o commit registrado é ancestral do HEAD e, depois dele,
- * só entraram merges da main (sincronização), nenhum commit de trabalho.
- */
+/** O relatório ainda vale para o HEAD? Só merges limpos da main depois dele (regra em fluxo.mjs, relatorioVale). */
 function valeParaHead(commit, pasta) {
-  if (!commit) return false;
-  if (git(['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: pasta, tolerante: true }) === null) return false;
-  return git(['rev-list', '--count', '--no-merges', '--first-parent', `${commit}..HEAD`], { cwd: pasta }) === '0';
+  return relatorioVale({ commit, cwd: pasta });
 }
 
 function prDaBranch(branch, raiz) {
   try {
-    const saida = execFileSync('gh', ['pr', 'list', '--head', branch, '--state', 'all', '--limit', '5',
-      '--json', 'number,state,url,isDraft,mergedAt'], { cwd: raiz, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    const prs = JSON.parse(saida);
-    // o mais relevante: aberto > mesclado > fechado
-    const ordem = { OPEN: 0, MERGED: 1, CLOSED: 2 };
-    return { ok: true, pr: prs.sort((a, b) => ordem[a.state] - ordem[b.state])[0] || null };
+    const saida = execFileSync('gh', ['pr', 'list', '--head', branch, '--state', 'all', '--limit', '20',
+      '--json', 'number,state,url,isDraft,mergedAt,headRefOid'], { cwd: raiz, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return { ok: true, pr: escolherPr(JSON.parse(saida)) };
   } catch (e) {
     return { ok: false, erro: String(e.stderr || e.message).trim().split('\n')[0] };
   }
@@ -118,28 +114,12 @@ async function coletar(chave, flags) {
     s.relatorios[nome] = { ...campos, vale: campos.commit ? valeParaHead(campos.commit, cwd) : null };
   }
   s.gh = prDaBranch(wt.branch, raiz);
+  const pr = s.gh.pr;
+  if (pr?.state === 'MERGED') {
+    if (!flags['sem-fetch']) trazerCommitDoPr(pr, cwd);
+    s.aposMescla = compararComMescla({ commitMesclado: pr.headRefOid, branch: wt.branch, cwd });
+  }
   return s;
-}
-
-function proximoPasso(s) {
-  const k = s.chave;
-  const r = s.relatorios ?? {};
-  const pr = s.gh?.pr;
-  if (pr?.state === 'MERGED') return [`/encerrar-card ${k}`, 'o PR já foi mesclado'];
-  if (!s.worktree) return [`/iniciar-card ${k}`, 'o card ainda não tem worktree nesta máquina'];
-  if (!r['contexto.md'] || !r['plano.md']) return [`/entender-card ${k}`, 'falta o contexto e o plano'];
-  if (!r['implementacao.md']) return [`/implementar-card ${k}`, 'o plano ainda não foi implementado'];
-  if (s.sujo.length) return [`/implementar-card ${k}`, 'há mudanças sem commit na worktree'];
-  const rev = r['revisao.md'];
-  if (!rev || !rev.vale) return [`/revisar-card ${k}`, rev ? 'entrou commit depois da última revisão' : 'ainda não foi revisado'];
-  if (rev.veredito !== 'APROVADO') return [`/implementar-card ${k}`, 'a revisão pediu ajustes'];
-  const aud = r['auditoria.md'];
-  if (!aud || !aud.vale) return [`/auditar-codigo ${k}`, aud ? 'entrou commit depois da última auditoria' : 'ainda não foi auditado'];
-  if (aud.veredito !== 'LIBERADO') return [`/implementar-card ${k}`, 'a auditoria bloqueou'];
-  if (s.atras > 0) return [`/auditar-codigo ${k}`, `a main andou ${s.atras} commit(s) depois da auditoria`];
-  if (!pr || pr.state === 'CLOSED') return [`/publicar-pr ${k}`, 'revisado e auditado, falta o PR'];
-  if (s.faltaEnviar > 0) return [`/publicar-pr ${k}`, 'há commits locais que ainda não foram para o PR'];
-  return [null, `PR #${pr.number} aberto: aguardando teste e merge. Depois do merge: /encerrar-card ${k}`];
 }
 
 function imprimir(s) {
@@ -309,6 +289,9 @@ async function encerrar({ pos, flags }) {
     if (!gh.ok) throw new Falha(`Não consegui consultar o PR (${gh.erro}). Rode "gh auth status".`);
     if (!gh.pr) throw new Falha(`${branch} não tem PR. Se o card foi desistido, use --abandonar (apaga o trabalho local).`);
     if (gh.pr.state !== 'MERGED') throw new Falha(`O PR #${gh.pr.number} está ${gh.pr.state}, não mesclado. Encerrar é só depois do merge (${gh.pr.url}).`);
+    trazerCommitDoPr(gh.pr, raiz);
+    const motivo = motivoParaNaoEncerrar({ chave, pr: gh.pr, branch, cwd: raiz });
+    if (motivo) throw new Falha(motivo);
   }
   const sujo = wt ? linhas(git(['status', '--porcelain'], { cwd: wt.pasta })) : [];
   if (sujo.length && !abandonar) {

@@ -5,6 +5,8 @@
 - Especificação: protótipo https://claude.ai/artifact/LFC3oCvfAfdz288hmVFxNv (quadros Tela-* e RH2-*).
 - Escopo, prazo e entregas: orçamento https://claude.ai/artifact/QpekMkXXrC5cSPkiZZRT2y
 - Preparação do ambiente e backlog: `PREPARACAO-DO-AMBIENTE.md`.
+- Sínteses, mapas das telas e mapa do banco: `docs/README.md` (o que cada um é e como os cards os citam).
+- Banco: as 30 tabelas já existem (migrations 0001 a 0003); antes de pensar em migration, veja `docs/banco.md`.
 - 3 setores: Injetora, Montagem, Teste & Embalagem (Teste e Embalagem são UM setor).
 - Tablet horizontal 1280×800 é o aparelho do operador; toda tela funciona também em 1440, 800×1280 e 390.
 - Stack: Next.js + Drizzle + Neon, Auth.js, Serwist + Dexie (offline), PDF no Railway, backup no S3.

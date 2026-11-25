@@ -37,6 +37,10 @@ O que faz um card bom é o critério de aceite: é por ele que a fase 4 decide s
 
    (`--dry-run` mostra o que seria enviado sem criar. Para corrigir um card já criado: `jira.mjs editar SCRUM-xx --arquivo <arquivo.md>`.)
 
+   O card novo entra sozinho no **sprint ativo** do quadro, para aparecer em "A fazer"; a saída diz em qual sprint entrou.
+   Épico não vai para sprint. Sem sprint ativo, o card fica no backlog e a saída avisa. Se o operador não quiser o card no
+   quadro, acrescente `--sem-sprint`.
+
 ## Não faça
 
 - Não crie branch, worktree nem código. Este comando só escreve no Jira.

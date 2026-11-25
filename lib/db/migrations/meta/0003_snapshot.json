@@ -1,0 +1,4515 @@
+{
+  "id": "0aecf564-3224-4e2e-8021-ef7318718d64",
+  "prevId": "b6c0c55f-13e9-4f79-bb24-5921b77ffcda",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.aviso_dispensado": {
+      "name": "aviso_dispensado",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultimo_registro_em": {
+          "name": "ultimo_registro_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aviso_em": {
+          "name": "aviso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dispensado_em": {
+          "name": "dispensado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "aviso_dispensado_setor_id_dispensado_em_idx": {
+          "name": "aviso_dispensado_setor_id_dispensado_em_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dispensado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "aviso_dispensado_setor_id_setor_id_fk": {
+          "name": "aviso_dispensado_setor_id_setor_id_fk",
+          "tableFrom": "aviso_dispensado",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "aviso_dispensado_tablet_id_tablet_id_fk": {
+          "name": "aviso_dispensado_tablet_id_tablet_id_fk",
+          "tableFrom": "aviso_dispensado",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.botao_esp32": {
+      "name": "botao_esp32",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mesa_id": {
+          "name": "mesa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "porta": {
+          "name": "porta",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_versao": {
+          "name": "token_versao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ultimo_heartbeat_em": {
+          "name": "ultimo_heartbeat_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultimo_pulso_em": {
+          "name": "ultimo_pulso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "firmware": {
+          "name": "firmware",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rssi": {
+          "name": "rssi",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_por": {
+          "name": "criado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "botao_esp32_mesa_id_idx": {
+          "name": "botao_esp32_mesa_id_idx",
+          "columns": [
+            {
+              "expression": "mesa_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"botao_esp32\".\"mesa_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "botao_esp32_mesa_id_mesa_id_fk": {
+          "name": "botao_esp32_mesa_id_mesa_id_fk",
+          "tableFrom": "botao_esp32",
+          "tableTo": "mesa",
+          "columnsFrom": [
+            "mesa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "botao_esp32_criado_por_usuario_id_fk": {
+          "name": "botao_esp32_criado_por_usuario_id_fk",
+          "tableFrom": "botao_esp32",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "botao_esp32_token_versao_check": {
+          "name": "botao_esp32_token_versao_check",
+          "value": "\"botao_esp32\".\"token_versao\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.calendario_mes": {
+      "name": "calendario_mes",
+      "schema": "",
+      "columns": {
+        "ano": {
+          "name": "ano",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mes": {
+          "name": "mes",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dias_uteis": {
+          "name": "dias_uteis",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "atualizado_por": {
+          "name": "atualizado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "calendario_mes_atualizado_por_usuario_id_fk": {
+          "name": "calendario_mes_atualizado_por_usuario_id_fk",
+          "tableFrom": "calendario_mes",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "atualizado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "calendario_mes_ano_mes_pk": {
+          "name": "calendario_mes_ano_mes_pk",
+          "columns": [
+            "ano",
+            "mes"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "calendario_mes_mes_check": {
+          "name": "calendario_mes_mes_check",
+          "value": "\"calendario_mes\".\"mes\" between 1 and 12"
+        },
+        "calendario_mes_dias_uteis_check": {
+          "name": "calendario_mes_dias_uteis_check",
+          "value": "\"calendario_mes\".\"dias_uteis\" between 1 and 31"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.correcao_registro": {
+      "name": "correcao_registro",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jornada_id": {
+          "name": "jornada_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "antes": {
+          "name": "antes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "depois": {
+          "name": "depois",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "correcao_registro_setor_id_dia_idx": {
+          "name": "correcao_registro_setor_id_dia_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "correcao_registro_setor_id_setor_id_fk": {
+          "name": "correcao_registro_setor_id_setor_id_fk",
+          "tableFrom": "correcao_registro",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "correcao_registro_jornada_id_jornada_id_fk": {
+          "name": "correcao_registro_jornada_id_jornada_id_fk",
+          "tableFrom": "correcao_registro",
+          "tableTo": "jornada",
+          "columnsFrom": [
+            "jornada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "correcao_registro_usuario_id_usuario_id_fk": {
+          "name": "correcao_registro_usuario_id_usuario_id_fk",
+          "tableFrom": "correcao_registro",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "correcao_registro_tipo_check": {
+          "name": "correcao_registro_tipo_check",
+          "value": "\"correcao_registro\".\"tipo\" in ('correcao', 'lancamento')"
+        },
+        "correcao_registro_motivo_check": {
+          "name": "correcao_registro_motivo_check",
+          "value": "btrim(\"correcao_registro\".\"motivo\") <> ''"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.estoque_movimento": {
+      "name": "estoque_movimento",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_movimento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pacotes": {
+          "name": "pacotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas": {
+          "name": "placas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reservado": {
+          "name": "reservado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "op_id": {
+          "name": "op_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registro_id": {
+          "name": "registro_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "estoque_movimento_medida_id_ocorrido_em_idx": {
+          "name": "estoque_movimento_medida_id_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "medida_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "estoque_movimento_registro_id_idx": {
+          "name": "estoque_movimento_registro_id_idx",
+          "columns": [
+            {
+              "expression": "registro_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"estoque_movimento\".\"registro_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "estoque_movimento_op_id_idx": {
+          "name": "estoque_movimento_op_id_idx",
+          "columns": [
+            {
+              "expression": "op_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "estoque_movimento_medida_id_medida_id_fk": {
+          "name": "estoque_movimento_medida_id_medida_id_fk",
+          "tableFrom": "estoque_movimento",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "estoque_movimento_op_id_ordem_producao_id_fk": {
+          "name": "estoque_movimento_op_id_ordem_producao_id_fk",
+          "tableFrom": "estoque_movimento",
+          "tableTo": "ordem_producao",
+          "columnsFrom": [
+            "op_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "estoque_movimento_registro_id_registro_producao_id_fk": {
+          "name": "estoque_movimento_registro_id_registro_producao_id_fk",
+          "tableFrom": "estoque_movimento",
+          "tableTo": "registro_producao",
+          "columnsFrom": [
+            "registro_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "estoque_movimento_usuario_id_usuario_id_fk": {
+          "name": "estoque_movimento_usuario_id_usuario_id_fk",
+          "tableFrom": "estoque_movimento",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "estoque_movimento_tablet_id_tablet_id_fk": {
+          "name": "estoque_movimento_tablet_id_tablet_id_fk",
+          "tableFrom": "estoque_movimento",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "estoque_movimento_motivo_check": {
+          "name": "estoque_movimento_motivo_check",
+          "value": "\"estoque_movimento\".\"tipo\" not in ('ajuste', 'saldo_inicial') or btrim(coalesce(\"estoque_movimento\".\"motivo\", '')) <> ''"
+        },
+        "estoque_movimento_entrada_check": {
+          "name": "estoque_movimento_entrada_check",
+          "value": "\"estoque_movimento\".\"tipo\" <> 'entrada' or (\"estoque_movimento\".\"registro_id\" is not null and \"estoque_movimento\".\"reservado\" = 0)"
+        },
+        "estoque_movimento_op_id_check": {
+          "name": "estoque_movimento_op_id_check",
+          "value": "\"estoque_movimento\".\"tipo\" not in ('reserva', 'liberacao', 'expedicao') or \"estoque_movimento\".\"op_id\" is not null"
+        },
+        "estoque_movimento_reserva_check": {
+          "name": "estoque_movimento_reserva_check",
+          "value": "\"estoque_movimento\".\"tipo\" not in ('reserva', 'liberacao') or \"estoque_movimento\".\"pacotes\" = 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.exportacao": {
+      "name": "exportacao",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_exportacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "formato": {
+          "name": "formato",
+          "type": "formato_exportacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "periodo_de": {
+          "name": "periodo_de",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "periodo_ate": {
+          "name": "periodo_ate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "setores": {
+          "name": "setores",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "secoes": {
+          "name": "secoes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'gerando'"
+        },
+        "arquivo_chave": {
+          "name": "arquivo_chave",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "erro": {
+          "name": "erro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "exportacao_criado_em_idx": {
+          "name": "exportacao_criado_em_idx",
+          "columns": [
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "exportacao_usuario_id_usuario_id_fk": {
+          "name": "exportacao_usuario_id_usuario_id_fk",
+          "tableFrom": "exportacao",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "exportacao_tablet_id_tablet_id_fk": {
+          "name": "exportacao_tablet_id_tablet_id_fk",
+          "tableFrom": "exportacao",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "exportacao_medida_id_medida_id_fk": {
+          "name": "exportacao_medida_id_medida_id_fk",
+          "tableFrom": "exportacao",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "exportacao_status_check": {
+          "name": "exportacao_status_check",
+          "value": "\"exportacao\".\"status\" in ('gerando', 'pronto', 'erro')"
+        },
+        "exportacao_periodo_check": {
+          "name": "exportacao_periodo_check",
+          "value": "\"exportacao\".\"periodo_de\" <= \"exportacao\".\"periodo_ate\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.jornada": {
+      "name": "jornada",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aberta_em": {
+          "name": "aberta_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechada_em": {
+          "name": "fechada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechamento": {
+          "name": "fechamento",
+          "type": "fechamento_jornada",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechada_por_tablet_id": {
+          "name": "fechada_por_tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechada_por_usuario_id": {
+          "name": "fechada_por_usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechada_com_zero": {
+          "name": "fechada_com_zero",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "revisada_em": {
+          "name": "revisada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revisada_por": {
+          "name": "revisada_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "origem_registro",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'tablet'"
+        },
+        "sem_horario": {
+          "name": "sem_horario",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "operadoras_informadas": {
+          "name": "operadoras_informadas",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "jornada_setor_id_setor_id_fk": {
+          "name": "jornada_setor_id_setor_id_fk",
+          "tableFrom": "jornada",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "jornada_fechada_por_tablet_id_tablet_id_fk": {
+          "name": "jornada_fechada_por_tablet_id_tablet_id_fk",
+          "tableFrom": "jornada",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "fechada_por_tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "jornada_fechada_por_usuario_id_usuario_id_fk": {
+          "name": "jornada_fechada_por_usuario_id_usuario_id_fk",
+          "tableFrom": "jornada",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "fechada_por_usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "jornada_revisada_por_usuario_id_fk": {
+          "name": "jornada_revisada_por_usuario_id_fk",
+          "tableFrom": "jornada",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "revisada_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "jornada_setor_id_dia_unique": {
+          "name": "jornada_setor_id_dia_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "setor_id",
+            "dia"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "jornada_fechamento_check": {
+          "name": "jornada_fechamento_check",
+          "value": "(\"jornada\".\"fechada_em\" is null) = (\"jornada\".\"fechamento\" is null)"
+        },
+        "jornada_operadoras_informadas_check": {
+          "name": "jornada_operadoras_informadas_check",
+          "value": "\"jornada\".\"operadoras_informadas\" is null or \"jornada\".\"operadoras_informadas\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.lote": {
+      "name": "lote",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jornada_id": {
+          "name": "jornada_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequencia": {
+          "name": "sequencia",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aberto_em": {
+          "name": "aberto_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fechado_em": {
+          "name": "fechado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_fechamento": {
+          "name": "motivo_fechamento",
+          "type": "motivo_fechamento_lote",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aberto_por_tablet_id": {
+          "name": "aberto_por_tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechado_por_tablet_id": {
+          "name": "fechado_por_tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "lote_aberto_idx": {
+          "name": "lote_aberto_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"lote\".\"fechado_em\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "lote_setor_id_dia_idx": {
+          "name": "lote_setor_id_dia_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "lote_setor_id_setor_id_fk": {
+          "name": "lote_setor_id_setor_id_fk",
+          "tableFrom": "lote",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "lote_jornada_id_jornada_id_fk": {
+          "name": "lote_jornada_id_jornada_id_fk",
+          "tableFrom": "lote",
+          "tableTo": "jornada",
+          "columnsFrom": [
+            "jornada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "lote_medida_id_medida_id_fk": {
+          "name": "lote_medida_id_medida_id_fk",
+          "tableFrom": "lote",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "lote_aberto_por_tablet_id_tablet_id_fk": {
+          "name": "lote_aberto_por_tablet_id_tablet_id_fk",
+          "tableFrom": "lote",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "aberto_por_tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "lote_fechado_por_tablet_id_tablet_id_fk": {
+          "name": "lote_fechado_por_tablet_id_tablet_id_fk",
+          "tableFrom": "lote",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "fechado_por_tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "lote_setor_id_check": {
+          "name": "lote_setor_id_check",
+          "value": "\"lote\".\"setor_id\" in ('inj', 'tes')"
+        },
+        "lote_sequencia_check": {
+          "name": "lote_sequencia_check",
+          "value": "\"lote\".\"sequencia\" >= 1"
+        },
+        "lote_fechamento_check": {
+          "name": "lote_fechamento_check",
+          "value": "(\"lote\".\"fechado_em\" is null) = (\"lote\".\"motivo_fechamento\" is null)"
+        },
+        "lote_fechado_em_check": {
+          "name": "lote_fechado_em_check",
+          "value": "\"lote\".\"fechado_em\" is null or \"lote\".\"fechado_em\" >= \"lote\".\"aberto_em\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.medida": {
+      "name": "medida",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "comprimento_m": {
+          "name": "comprimento_m",
+          "type": "numeric(4, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "area_m2": {
+          "name": "area_m2",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativa": {
+          "name": "ativa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "estoque_minimo_pacotes": {
+          "name": "estoque_minimo_pacotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "medida_comprimento_m_unique": {
+          "name": "medida_comprimento_m_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "comprimento_m"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.mesa": {
+      "name": "mesa",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "numero": {
+          "name": "numero",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "operadora_id": {
+          "name": "operadora_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ativa": {
+          "name": "ativa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "config_alterada_em": {
+          "name": "config_alterada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "mesa_operadora_id_operadora_id_fk": {
+          "name": "mesa_operadora_id_operadora_id_fk",
+          "tableFrom": "mesa",
+          "tableTo": "operadora",
+          "columnsFrom": [
+            "operadora_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "mesa_medida_id_medida_id_fk": {
+          "name": "mesa_medida_id_medida_id_fk",
+          "tableFrom": "mesa",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "mesa_numero_unique": {
+          "name": "mesa_numero_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "mesa_numero_check": {
+          "name": "mesa_numero_check",
+          "value": "\"mesa\".\"numero\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.meta_medida": {
+      "name": "meta_medida",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas_dia": {
+          "name": "placas_dia",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vigente_de": {
+          "name": "vigente_de",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_por": {
+          "name": "criado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meta_medida_medida_id_medida_id_fk": {
+          "name": "meta_medida_medida_id_medida_id_fk",
+          "tableFrom": "meta_medida",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "meta_medida_criado_por_usuario_id_fk": {
+          "name": "meta_medida_criado_por_usuario_id_fk",
+          "tableFrom": "meta_medida",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "meta_medida_medida_id_vigente_de_unique": {
+          "name": "meta_medida_medida_id_vigente_de_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "medida_id",
+            "vigente_de"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "meta_medida_placas_dia_check": {
+          "name": "meta_medida_placas_dia_check",
+          "value": "\"meta_medida\".\"placas_dia\" is null or \"meta_medida\".\"placas_dia\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.meta_setor": {
+      "name": "meta_setor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas_dia": {
+          "name": "placas_dia",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigente_de": {
+          "name": "vigente_de",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_por": {
+          "name": "criado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meta_setor_setor_id_setor_id_fk": {
+          "name": "meta_setor_setor_id_setor_id_fk",
+          "tableFrom": "meta_setor",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "meta_setor_criado_por_usuario_id_fk": {
+          "name": "meta_setor_criado_por_usuario_id_fk",
+          "tableFrom": "meta_setor",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "meta_setor_setor_id_vigente_de_unique": {
+          "name": "meta_setor_setor_id_vigente_de_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "setor_id",
+            "vigente_de"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "meta_setor_placas_dia_check": {
+          "name": "meta_setor_placas_dia_check",
+          "value": "\"meta_setor\".\"placas_dia\" >= 10"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.op_evento": {
+      "name": "op_evento",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "op_id": {
+          "name": "op_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_op_evento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pacotes": {
+          "name": "pacotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "detalhe": {
+          "name": "detalhe",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "op_evento_op_id_ocorrido_em_idx": {
+          "name": "op_evento_op_id_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "op_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "op_evento_op_id_ordem_producao_id_fk": {
+          "name": "op_evento_op_id_ordem_producao_id_fk",
+          "tableFrom": "op_evento",
+          "tableTo": "ordem_producao",
+          "columnsFrom": [
+            "op_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "op_evento_usuario_id_usuario_id_fk": {
+          "name": "op_evento_usuario_id_usuario_id_fk",
+          "tableFrom": "op_evento",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.operacao_tablet": {
+      "name": "operacao_tablet",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vinculo_id": {
+          "name": "vinculo_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seq": {
+          "name": "seq",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recebido_em": {
+          "name": "recebido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resultado": {
+          "name": "resultado",
+          "type": "resultado_operacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motivo_rejeicao": {
+          "name": "motivo_rejeicao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resolvida_em": {
+          "name": "resolvida_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolvida_por": {
+          "name": "resolvida_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "operacao_tablet_tablet_id_recebido_em_idx": {
+          "name": "operacao_tablet_tablet_id_recebido_em_idx",
+          "columns": [
+            {
+              "expression": "tablet_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "recebido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "operacao_tablet_rejeitada_pendente_idx": {
+          "name": "operacao_tablet_rejeitada_pendente_idx",
+          "columns": [
+            {
+              "expression": "resultado",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"operacao_tablet\".\"resultado\" = 'rejeitada' and \"operacao_tablet\".\"resolvida_em\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "operacao_tablet_tablet_id_tablet_id_fk": {
+          "name": "operacao_tablet_tablet_id_tablet_id_fk",
+          "tableFrom": "operacao_tablet",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "operacao_tablet_vinculo_id_tablet_vinculo_id_fk": {
+          "name": "operacao_tablet_vinculo_id_tablet_vinculo_id_fk",
+          "tableFrom": "operacao_tablet",
+          "tableTo": "tablet_vinculo",
+          "columnsFrom": [
+            "vinculo_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "operacao_tablet_setor_id_setor_id_fk": {
+          "name": "operacao_tablet_setor_id_setor_id_fk",
+          "tableFrom": "operacao_tablet",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "operacao_tablet_resolvida_por_usuario_id_fk": {
+          "name": "operacao_tablet_resolvida_por_usuario_id_fk",
+          "tableFrom": "operacao_tablet",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "resolvida_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.operadora": {
+      "name": "operadora",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativa": {
+          "name": "ativa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "desativada_em": {
+          "name": "desativada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "operadora_nome_ativa_idx": {
+          "name": "operadora_nome_ativa_idx",
+          "columns": [
+            {
+              "expression": "lower(\"nome\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"operadora\".\"ativa\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "operadora_nome_check": {
+          "name": "operadora_nome_check",
+          "value": "btrim(\"operadora\".\"nome\") <> ''"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.ordem_producao": {
+      "name": "ordem_producao",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "ordem_producao_numero_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "cliente": {
+          "name": "cliente",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pacotes_pedidos": {
+          "name": "pacotes_pedidos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_entrega": {
+          "name": "data_entrega",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "observacao": {
+          "name": "observacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "estado_op",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'aberta'"
+        },
+        "pacotes_reservados": {
+          "name": "pacotes_reservados",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "pacotes_expedidos": {
+          "name": "pacotes_expedidos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "criada_por": {
+          "name": "criada_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expedida_em": {
+          "name": "expedida_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelada_em": {
+          "name": "cancelada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ordem_producao_estado_data_entrega_idx": {
+          "name": "ordem_producao_estado_data_entrega_idx",
+          "columns": [
+            {
+              "expression": "estado",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "data_entrega",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ordem_producao_medida_id_idx": {
+          "name": "ordem_producao_medida_id_idx",
+          "columns": [
+            {
+              "expression": "medida_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ordem_producao_medida_id_medida_id_fk": {
+          "name": "ordem_producao_medida_id_medida_id_fk",
+          "tableFrom": "ordem_producao",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "ordem_producao_criada_por_usuario_id_fk": {
+          "name": "ordem_producao_criada_por_usuario_id_fk",
+          "tableFrom": "ordem_producao",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criada_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ordem_producao_numero_unique": {
+          "name": "ordem_producao_numero_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ordem_producao_pacotes_pedidos_check": {
+          "name": "ordem_producao_pacotes_pedidos_check",
+          "value": "\"ordem_producao\".\"pacotes_pedidos\" > 0"
+        },
+        "ordem_producao_contadores_check": {
+          "name": "ordem_producao_contadores_check",
+          "value": "\"ordem_producao\".\"pacotes_reservados\" >= 0 and \"ordem_producao\".\"pacotes_expedidos\" >= 0"
+        },
+        "ordem_producao_cancelada_check": {
+          "name": "ordem_producao_cancelada_check",
+          "value": "(\"ordem_producao\".\"estado\" = 'cancelada') = (\"ordem_producao\".\"cancelada_em\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pausa": {
+      "name": "pausa",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jornada_id": {
+          "name": "jornada_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inicio": {
+          "name": "inicio",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fim": {
+          "name": "fim",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "origem_pausa",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria_id": {
+          "name": "categoria_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_id": {
+          "name": "motivo_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_texto": {
+          "name": "motivo_texto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "planejada": {
+          "name": "planejada",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aviso_em": {
+          "name": "aviso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "respondida_em": {
+          "name": "respondida_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "encerrada_por": {
+          "name": "encerrada_por",
+          "type": "encerramento_pausa",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classificada_por": {
+          "name": "classificada_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classificada_em": {
+          "name": "classificada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descricao_rh": {
+          "name": "descricao_rh",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pausa_aberta_idx": {
+          "name": "pausa_aberta_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"pausa\".\"fim\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pausa_setor_id_dia_idx": {
+          "name": "pausa_setor_id_dia_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pausa_setor_id_inicio_idx": {
+          "name": "pausa_setor_id_inicio_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "inicio",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pausa_categoria_id_dia_idx": {
+          "name": "pausa_categoria_id_dia_idx",
+          "columns": [
+            {
+              "expression": "categoria_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pausa_setor_id_setor_id_fk": {
+          "name": "pausa_setor_id_setor_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_jornada_id_jornada_id_fk": {
+          "name": "pausa_jornada_id_jornada_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "jornada",
+          "columnsFrom": [
+            "jornada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_categoria_id_pausa_categoria_id_fk": {
+          "name": "pausa_categoria_id_pausa_categoria_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "pausa_categoria",
+          "columnsFrom": [
+            "categoria_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_motivo_id_pausa_motivo_id_fk": {
+          "name": "pausa_motivo_id_pausa_motivo_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "pausa_motivo",
+          "columnsFrom": [
+            "motivo_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_tablet_id_tablet_id_fk": {
+          "name": "pausa_tablet_id_tablet_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_classificada_por_usuario_id_fk": {
+          "name": "pausa_classificada_por_usuario_id_fk",
+          "tableFrom": "pausa",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "classificada_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pausa_fim_check": {
+          "name": "pausa_fim_check",
+          "value": "\"pausa\".\"fim\" is null or \"pausa\".\"fim\" >= \"pausa\".\"inicio\""
+        },
+        "pausa_encerrada_por_check": {
+          "name": "pausa_encerrada_por_check",
+          "value": "(\"pausa\".\"fim\" is null) = (\"pausa\".\"encerrada_por\" is null)"
+        },
+        "pausa_motivo_check": {
+          "name": "pausa_motivo_check",
+          "value": "\"pausa\".\"motivo_id\" is null or \"pausa\".\"categoria_id\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pausa_categoria": {
+      "name": "pausa_categoria",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pergunta": {
+          "name": "pergunta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cor": {
+          "name": "cor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icone": {
+          "name": "icone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "planejada": {
+          "name": "planejada",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativa": {
+          "name": "ativa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pausa_motivo": {
+      "name": "pausa_motivo",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "categoria_id": {
+          "name": "categoria_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "pausa_motivo_categoria_id_setor_id_ordem_idx": {
+          "name": "pausa_motivo_categoria_id_setor_id_ordem_idx",
+          "columns": [
+            {
+              "expression": "categoria_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ordem",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pausa_motivo_nome_ativo_idx": {
+          "name": "pausa_motivo_nome_ativo_idx",
+          "columns": [
+            {
+              "expression": "categoria_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "coalesce(\"setor_id\", '*')",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "lower(\"nome\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"pausa_motivo\".\"ativo\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pausa_motivo_categoria_id_pausa_categoria_id_fk": {
+          "name": "pausa_motivo_categoria_id_pausa_categoria_id_fk",
+          "tableFrom": "pausa_motivo",
+          "tableTo": "pausa_categoria",
+          "columnsFrom": [
+            "categoria_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pausa_motivo_setor_id_setor_id_fk": {
+          "name": "pausa_motivo_setor_id_setor_id_fk",
+          "tableFrom": "pausa_motivo",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pausa_motivo_nome_check": {
+          "name": "pausa_motivo_nome_check",
+          "value": "btrim(\"pausa_motivo\".\"nome\") <> ''"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pulso_esp32": {
+      "name": "pulso_esp32",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "botao_id": {
+          "name": "botao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "boot_id": {
+          "name": "boot_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seq": {
+          "name": "seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recebido_em": {
+          "name": "recebido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "mesa_id": {
+          "name": "mesa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resultado": {
+          "name": "resultado",
+          "type": "resultado_pulso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registro_id": {
+          "name": "registro_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pulso_esp32_mesa_id_ocorrido_em_idx": {
+          "name": "pulso_esp32_mesa_id_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "mesa_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pulso_esp32_botao_id_botao_esp32_id_fk": {
+          "name": "pulso_esp32_botao_id_botao_esp32_id_fk",
+          "tableFrom": "pulso_esp32",
+          "tableTo": "botao_esp32",
+          "columnsFrom": [
+            "botao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pulso_esp32_mesa_id_mesa_id_fk": {
+          "name": "pulso_esp32_mesa_id_mesa_id_fk",
+          "tableFrom": "pulso_esp32",
+          "tableTo": "mesa",
+          "columnsFrom": [
+            "mesa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "pulso_esp32_registro_id_registro_producao_id_fk": {
+          "name": "pulso_esp32_registro_id_registro_producao_id_fk",
+          "tableFrom": "pulso_esp32",
+          "tableTo": "registro_producao",
+          "columnsFrom": [
+            "registro_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pulso_esp32_botao_id_boot_id_seq_unique": {
+          "name": "pulso_esp32_botao_id_boot_id_seq_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "botao_id",
+            "boot_id",
+            "seq"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "pulso_esp32_registro_id_check": {
+          "name": "pulso_esp32_registro_id_check",
+          "value": "(\"pulso_esp32\".\"resultado\" = 'contou') = (\"pulso_esp32\".\"registro_id\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.registro_acao": {
+      "name": "registro_acao",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ator": {
+          "name": "ator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acao": {
+          "name": "acao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entidade": {
+          "name": "entidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entidade_id": {
+          "name": "entidade_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "antes": {
+          "name": "antes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "depois": {
+          "name": "depois",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip": {
+          "name": "ip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "registro_acao_ocorrido_em_idx": {
+          "name": "registro_acao_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_acao_entidade_idx": {
+          "name": "registro_acao_entidade_idx",
+          "columns": [
+            {
+              "expression": "entidade",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entidade_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_acao_acao_ocorrido_em_idx": {
+          "name": "registro_acao_acao_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "acao",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "registro_acao_usuario_id_usuario_id_fk": {
+          "name": "registro_acao_usuario_id_usuario_id_fk",
+          "tableFrom": "registro_acao",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_acao_tablet_id_tablet_id_fk": {
+          "name": "registro_acao_tablet_id_tablet_id_fk",
+          "tableFrom": "registro_acao",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.registro_producao": {
+      "name": "registro_producao",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jornada_id": {
+          "name": "jornada_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lote_id": {
+          "name": "lote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_registro",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "natureza": {
+          "name": "natureza",
+          "type": "natureza_registro",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantidade": {
+          "name": "quantidade",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas": {
+          "name": "placas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ciclos": {
+          "name": "ciclos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mesa_id": {
+          "name": "mesa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operadora_id": {
+          "name": "operadora_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "origem_registro",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "botao_id": {
+          "name": "botao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estorna_id": {
+          "name": "estorna_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "correcao_id": {
+          "name": "correcao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recebido_em": {
+          "name": "recebido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "desvio_relogio_ms": {
+          "name": "desvio_relogio_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "registro_producao_setor_id_dia_idx": {
+          "name": "registro_producao_setor_id_dia_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_setor_id_ocorrido_em_idx": {
+          "name": "registro_producao_setor_id_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_lote_id_idx": {
+          "name": "registro_producao_lote_id_idx",
+          "columns": [
+            {
+              "expression": "lote_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_mesa_id_dia_idx": {
+          "name": "registro_producao_mesa_id_dia_idx",
+          "columns": [
+            {
+              "expression": "mesa_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"registro_producao\".\"setor_id\" = 'mon'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_operadora_id_dia_idx": {
+          "name": "registro_producao_operadora_id_dia_idx",
+          "columns": [
+            {
+              "expression": "operadora_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"registro_producao\".\"setor_id\" = 'mon'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_desfazer_idx": {
+          "name": "registro_producao_desfazer_idx",
+          "columns": [
+            {
+              "expression": "estorna_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"registro_producao\".\"natureza\" = 'desfazer'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_correcao_id_idx": {
+          "name": "registro_producao_correcao_id_idx",
+          "columns": [
+            {
+              "expression": "correcao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"registro_producao\".\"correcao_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "registro_producao_tablet_id_recebido_em_idx": {
+          "name": "registro_producao_tablet_id_recebido_em_idx",
+          "columns": [
+            {
+              "expression": "tablet_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "recebido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "registro_producao_setor_id_setor_id_fk": {
+          "name": "registro_producao_setor_id_setor_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_jornada_id_jornada_id_fk": {
+          "name": "registro_producao_jornada_id_jornada_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "jornada",
+          "columnsFrom": [
+            "jornada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_lote_id_lote_id_fk": {
+          "name": "registro_producao_lote_id_lote_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "lote",
+          "columnsFrom": [
+            "lote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_medida_id_medida_id_fk": {
+          "name": "registro_producao_medida_id_medida_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "medida",
+          "columnsFrom": [
+            "medida_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_mesa_id_mesa_id_fk": {
+          "name": "registro_producao_mesa_id_mesa_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "mesa",
+          "columnsFrom": [
+            "mesa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_operadora_id_operadora_id_fk": {
+          "name": "registro_producao_operadora_id_operadora_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "operadora",
+          "columnsFrom": [
+            "operadora_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_tablet_id_tablet_id_fk": {
+          "name": "registro_producao_tablet_id_tablet_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_botao_id_botao_esp32_id_fk": {
+          "name": "registro_producao_botao_id_botao_esp32_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "botao_esp32",
+          "columnsFrom": [
+            "botao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_usuario_id_usuario_id_fk": {
+          "name": "registro_producao_usuario_id_usuario_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_estorna_id_registro_producao_id_fk": {
+          "name": "registro_producao_estorna_id_registro_producao_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "registro_producao",
+          "columnsFrom": [
+            "estorna_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "registro_producao_correcao_id_correcao_registro_id_fk": {
+          "name": "registro_producao_correcao_id_correcao_registro_id_fk",
+          "tableFrom": "registro_producao",
+          "tableTo": "correcao_registro",
+          "columnsFrom": [
+            "correcao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "registro_producao_quantidade_check": {
+          "name": "registro_producao_quantidade_check",
+          "value": "\"registro_producao\".\"quantidade\" <> 0"
+        },
+        "registro_producao_tipo_setor_check": {
+          "name": "registro_producao_tipo_setor_check",
+          "value": "(\"registro_producao\".\"setor_id\" = 'inj' and left(\"registro_producao\".\"tipo\"::text, 4) = 'inj_')\n        or (\"registro_producao\".\"setor_id\" = 'mon' and \"registro_producao\".\"tipo\" = 'mon_placa')\n        or (\"registro_producao\".\"setor_id\" = 'tes' and left(\"registro_producao\".\"tipo\"::text, 4) = 'tes_')"
+        },
+        "registro_producao_lote_id_check": {
+          "name": "registro_producao_lote_id_check",
+          "value": "\"registro_producao\".\"lote_id\" is not null or \"registro_producao\".\"origem\" <> 'tablet' or \"registro_producao\".\"setor_id\" = 'mon'"
+        },
+        "registro_producao_montagem_check": {
+          "name": "registro_producao_montagem_check",
+          "value": "\"registro_producao\".\"setor_id\" = 'mon' or (\"registro_producao\".\"mesa_id\" is null and \"registro_producao\".\"operadora_id\" is null)"
+        },
+        "registro_producao_origem_check": {
+          "name": "registro_producao_origem_check",
+          "value": "(\"registro_producao\".\"origem\" <> 'tablet' or \"registro_producao\".\"tablet_id\" is not null)\n        and (\"registro_producao\".\"origem\" <> 'esp32' or \"registro_producao\".\"botao_id\" is not null)\n        and (\"registro_producao\".\"origem\" <> 'rh' or \"registro_producao\".\"usuario_id\" is not null)"
+        },
+        "registro_producao_desfazer_check": {
+          "name": "registro_producao_desfazer_check",
+          "value": "\"registro_producao\".\"natureza\" <> 'desfazer' or \"registro_producao\".\"estorna_id\" is not null"
+        },
+        "registro_producao_correcao_check": {
+          "name": "registro_producao_correcao_check",
+          "value": "\"registro_producao\".\"natureza\" not in ('correcao', 'lancamento') or \"registro_producao\".\"correcao_id\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.relatorio_agendado": {
+      "name": "relatorio_agendado",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "default": 1
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "destinatarios": {
+          "name": "destinatarios",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "secoes": {
+          "name": "secoes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "ultimo_envio_em": {
+          "name": "ultimo_envio_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultimo_resultado": {
+          "name": "ultimo_resultado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_por": {
+          "name": "atualizado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "relatorio_agendado_atualizado_por_usuario_id_fk": {
+          "name": "relatorio_agendado_atualizado_por_usuario_id_fk",
+          "tableFrom": "relatorio_agendado",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "atualizado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "relatorio_agendado_id_check": {
+          "name": "relatorio_agendado_id_check",
+          "value": "\"relatorio_agendado\".\"id\" = 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.setor": {
+      "name": "setor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_curto": {
+          "name": "nome_curto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cor": {
+          "name": "cor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unidade": {
+          "name": "unidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "setor_slug_unique": {
+          "name": "setor_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.setor_config": {
+      "name": "setor_config",
+      "schema": "",
+      "columns": {
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "minutos_aviso_parada": {
+          "name": "minutos_aviso_parada",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas_por_pacote_padrao": {
+          "name": "placas_por_pacote_padrao",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "placas_por_pacote_min": {
+          "name": "placas_por_pacote_min",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "placas_por_pacote_max": {
+          "name": "placas_por_pacote_max",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inicio_jornada": {
+          "name": "inicio_jornada",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fechamento_automatico": {
+          "name": "fechamento_automatico",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_por": {
+          "name": "atualizado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "setor_config_setor_id_setor_id_fk": {
+          "name": "setor_config_setor_id_setor_id_fk",
+          "tableFrom": "setor_config",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "setor_config_atualizado_por_usuario_id_fk": {
+          "name": "setor_config_atualizado_por_usuario_id_fk",
+          "tableFrom": "setor_config",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "atualizado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "setor_config_minutos_aviso_parada_check": {
+          "name": "setor_config_minutos_aviso_parada_check",
+          "value": "\"setor_config\".\"minutos_aviso_parada\" between 5 and 60"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.setor_estado": {
+      "name": "setor_estado",
+      "schema": "",
+      "columns": {
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "versao": {
+          "name": "versao",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "ultimo_registro_em": {
+          "name": "ultimo_registro_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultima_atividade_em": {
+          "name": "ultima_atividade_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "setor_estado_setor_id_setor_id_fk": {
+          "name": "setor_estado_setor_id_setor_id_fk",
+          "tableFrom": "setor_estado",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tablet": {
+      "name": "tablet",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modo": {
+          "name": "modo",
+          "type": "modo_tablet",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'setor'"
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codigo": {
+          "name": "codigo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "codigo_seq": {
+          "name": "codigo_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "codigo_gerado_em": {
+          "name": "codigo_gerado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "criado_por": {
+          "name": "criado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "arquivado_em": {
+          "name": "arquivado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "tablet_nome_ativo_idx": {
+          "name": "tablet_nome_ativo_idx",
+          "columns": [
+            {
+              "expression": "lower(\"nome\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"tablet\".\"arquivado_em\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tablet_setor_id_idx": {
+          "name": "tablet_setor_id_idx",
+          "columns": [
+            {
+              "expression": "setor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tablet_setor_id_setor_id_fk": {
+          "name": "tablet_setor_id_setor_id_fk",
+          "tableFrom": "tablet",
+          "tableTo": "setor",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "tablet_criado_por_usuario_id_fk": {
+          "name": "tablet_criado_por_usuario_id_fk",
+          "tableFrom": "tablet",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tablet_codigo_unique": {
+          "name": "tablet_codigo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "codigo"
+          ]
+        },
+        "tablet_codigo_seq_unique": {
+          "name": "tablet_codigo_seq_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "codigo_seq"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "tablet_setor_id_check": {
+          "name": "tablet_setor_id_check",
+          "value": "\"tablet\".\"modo\" <> 'setor' or \"tablet\".\"setor_id\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.tablet_vinculo": {
+      "name": "tablet_vinculo",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tablet_id": {
+          "name": "tablet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vinculado_em": {
+          "name": "vinculado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "vinculado_por": {
+          "name": "vinculado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "app_versao": {
+          "name": "app_versao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultimo_acesso_em": {
+          "name": "ultimo_acesso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revogado_em": {
+          "name": "revogado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revogado_motivo": {
+          "name": "revogado_motivo",
+          "type": "motivo_revogacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "tablet_vinculo_ativo_idx": {
+          "name": "tablet_vinculo_ativo_idx",
+          "columns": [
+            {
+              "expression": "tablet_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"tablet_vinculo\".\"revogado_em\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tablet_vinculo_tablet_id_tablet_id_fk": {
+          "name": "tablet_vinculo_tablet_id_tablet_id_fk",
+          "tableFrom": "tablet_vinculo",
+          "tableTo": "tablet",
+          "columnsFrom": [
+            "tablet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "tablet_vinculo_vinculado_por_usuario_id_fk": {
+          "name": "tablet_vinculo_vinculado_por_usuario_id_fk",
+          "tableFrom": "tablet_vinculo",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "vinculado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tablet_vinculo_token_hash_unique": {
+          "name": "tablet_vinculo_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tentativa_acesso": {
+      "name": "tentativa_acesso",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "alvo": {
+          "name": "alvo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chave": {
+          "name": "chave",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sucesso": {
+          "name": "sucesso",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ocorrido_em": {
+          "name": "ocorrido_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "tentativa_acesso_alvo_chave_ocorrido_em_idx": {
+          "name": "tentativa_acesso_alvo_chave_ocorrido_em_idx",
+          "columns": [
+            {
+              "expression": "alvo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "chave",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ocorrido_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuario": {
+      "name": "usuario",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel": {
+          "name": "papel",
+          "type": "papel_usuario",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_versao": {
+          "name": "senha_versao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ultimo_acesso_em": {
+          "name": "ultimo_acesso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "criado_por": {
+          "name": "criado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "usuario_ativo_idx": {
+          "name": "usuario_ativo_idx",
+          "columns": [
+            {
+              "expression": "ativo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "usuario_criado_por_usuario_id_fk": {
+          "name": "usuario_criado_por_usuario_id_fk",
+          "tableFrom": "usuario",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "criado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.encerramento_pausa": {
+      "name": "encerramento_pausa",
+      "schema": "public",
+      "values": [
+        "retomar",
+        "contagem",
+        "fechamento_dia",
+        "rh"
+      ]
+    },
+    "public.estado_op": {
+      "name": "estado_op",
+      "schema": "public",
+      "values": [
+        "aberta",
+        "em_producao",
+        "concluida",
+        "cancelada"
+      ]
+    },
+    "public.fechamento_jornada": {
+      "name": "fechamento_jornada",
+      "schema": "public",
+      "values": [
+        "manual",
+        "automatico",
+        "rh"
+      ]
+    },
+    "public.formato_exportacao": {
+      "name": "formato_exportacao",
+      "schema": "public",
+      "values": [
+        "pdf",
+        "xlsx",
+        "csv"
+      ]
+    },
+    "public.modo_tablet": {
+      "name": "modo_tablet",
+      "schema": "public",
+      "values": [
+        "setor",
+        "tv"
+      ]
+    },
+    "public.motivo_fechamento_lote": {
+      "name": "motivo_fechamento_lote",
+      "schema": "public",
+      "values": [
+        "manual",
+        "troca_medida",
+        "fim_do_dia",
+        "virada_do_dia"
+      ]
+    },
+    "public.motivo_revogacao": {
+      "name": "motivo_revogacao",
+      "schema": "public",
+      "values": [
+        "novo_codigo",
+        "desvinculado_admin",
+        "usar_outro_id",
+        "substituido"
+      ]
+    },
+    "public.natureza_registro": {
+      "name": "natureza_registro",
+      "schema": "public",
+      "values": [
+        "toque",
+        "ajuste",
+        "desfazer",
+        "correcao",
+        "lancamento"
+      ]
+    },
+    "public.origem_pausa": {
+      "name": "origem_pausa",
+      "schema": "public",
+      "values": [
+        "operador",
+        "aviso_respondido",
+        "aviso_sem_resposta",
+        "rh"
+      ]
+    },
+    "public.origem_registro": {
+      "name": "origem_registro",
+      "schema": "public",
+      "values": [
+        "tablet",
+        "esp32",
+        "rh"
+      ]
+    },
+    "public.papel_usuario": {
+      "name": "papel_usuario",
+      "schema": "public",
+      "values": [
+        "rh",
+        "admin"
+      ]
+    },
+    "public.resultado_operacao": {
+      "name": "resultado_operacao",
+      "schema": "public",
+      "values": [
+        "aplicada",
+        "rejeitada"
+      ]
+    },
+    "public.resultado_pulso": {
+      "name": "resultado_pulso",
+      "schema": "public",
+      "values": [
+        "contou",
+        "mesa_pendente",
+        "duplicado",
+        "rapido_demais",
+        "botao_inativo"
+      ]
+    },
+    "public.tipo_exportacao": {
+      "name": "tipo_exportacao",
+      "schema": "public",
+      "values": [
+        "mensal",
+        "operadoras",
+        "perdas",
+        "estoque",
+        "fechamentos",
+        "historico_setor"
+      ]
+    },
+    "public.tipo_movimento": {
+      "name": "tipo_movimento",
+      "schema": "public",
+      "values": [
+        "entrada",
+        "reserva",
+        "liberacao",
+        "expedicao",
+        "ajuste",
+        "saldo_inicial"
+      ]
+    },
+    "public.tipo_op_evento": {
+      "name": "tipo_op_evento",
+      "schema": "public",
+      "values": [
+        "criada",
+        "editada",
+        "reserva",
+        "liberacao",
+        "atendida",
+        "expedicao",
+        "cancelada"
+      ]
+    },
+    "public.tipo_registro": {
+      "name": "tipo_registro",
+      "schema": "public",
+      "values": [
+        "inj_boa2",
+        "inj_boa1",
+        "inj_vazio",
+        "inj_perda_cab_meio",
+        "inj_perda_cab_total",
+        "inj_perda_can_meio",
+        "inj_perda_can_total",
+        "mon_placa",
+        "tes_pacote",
+        "tes_defeito_caninho",
+        "tes_defeito_cabecote"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.v_montagem_dia": {
+      "columns": {
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "operadora_id": {
+          "name": "operadora_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mesa_id": {
+          "name": "mesa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas": {
+          "name": "placas",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ultimo_em": {
+          "name": "ultimo_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "\n  select dia, operadora_id, mesa_id, medida_id,\n         sum(placas) as placas,\n         max(ocorrido_em) as ultimo_em\n  from registro_producao\n  where setor_id = 'mon'\n  group by dia, operadora_id, mesa_id, medida_id\n",
+      "name": "v_montagem_dia",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.v_producao_dia": {
+      "columns": {
+        "setor_id": {
+          "name": "setor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia": {
+          "name": "dia",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medida_id": {
+          "name": "medida_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_registro",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantidade": {
+          "name": "quantidade",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "placas": {
+          "name": "placas",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ciclos": {
+          "name": "ciclos",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "primeiro_em": {
+          "name": "primeiro_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ultimo_em": {
+          "name": "ultimo_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "teve_correcao": {
+          "name": "teve_correcao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "\n  select setor_id, dia, medida_id, tipo,\n         sum(quantidade) as quantidade,\n         sum(placas) as placas,\n         sum(ciclos) as ciclos,\n         min(ocorrido_em) as primeiro_em,\n         max(ocorrido_em) as ultimo_em,\n         bool_or(natureza in ('ajuste', 'desfazer', 'correcao')) as teve_correcao\n  from registro_producao\n  group by setor_id, dia, medida_id, tipo\n",
+      "name": "v_producao_dia",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    }
+  },
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
