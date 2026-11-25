@@ -13,6 +13,8 @@
     "tipos": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:ver": "vitest",
+    "teste:larguras": "playwright test",
+    "fotos": "node scripts/fotos.mjs",
     "db:gerar": "drizzle-kit generate",
     "db:migrar": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed.ts"
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.16",
     "@next/env": "16.4.6",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.7",
     "@types/react": "19.3.1",
     "@types/react-dom": "19.3.0",

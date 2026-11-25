@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 // Caminho relativo: o alias @/ não vale no arquivo de configuração.
 import { cores, raios, tamanhosDeFonte } from "./lib/tema/tokens";
+import { utilitarios } from "./lib/tema/utilitarios";
 
 const config: Config = {
   content: [
@@ -9,6 +10,18 @@ const config: Config = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    // Os cortes de largura do sistema (docs/larguras.md). Substituem os do Tailwind:
+    // sm:, md:, lg: e xl: não existem. O código é "celular primeiro": a classe sem prefixo é a do celular.
+    // A ordem importa: é a ordem em que as regras saem no CSS.
+    screens: {
+      tablet: "768px",
+      largo: "1024px",
+      pc: "1200px",
+      posto: "1280px",
+      // Tela de toque e janela baixa. Por existirem estes dois, o Tailwind 3 não gera as variantes max-*.
+      toque: { raw: "(pointer: coarse)" },
+      baixo: { raw: "(max-height: 719px)" },
+    },
     // Paleta, escala de fonte e raios são substituídos: só existe o que está no protótipo.
     colors: {
       transparent: "transparent",
@@ -30,6 +43,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [utilitarios],
 };
 export default config;
