@@ -2,26 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    /* Cor do setor da tela; neutra até a tela de um setor sobrescrever. */
+    --setor: theme("colors.texto.apoio");
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  body {
+    background-color: theme("colors.fundo.DEFAULT");
+    color: theme("colors.texto.DEFAULT");
+    font-variant-numeric: tabular-nums;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  :focus-visible {
+    outline: 3px solid theme("colors.acao.claro-2");
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Com o elemento no seletor, vence o cinza padrão do preflight. */
+  input::placeholder,
+  textarea::placeholder {
+    color: theme("colors.texto.placeholder");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
