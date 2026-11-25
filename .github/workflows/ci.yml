@@ -48,6 +48,24 @@ jobs:
       - uses: ./.github/actions/preparar
       - run: npm test
 
+  # Conferência de larguras (docs/larguras.md): faz o próprio build, com a galeria ligada.
+  larguras:
+    name: larguras
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - run: npx playwright install --with-deps chromium
+      - run: npm run teste:larguras
+      # As fotos são só para olhar (não são comparadas); sobem mesmo quando uma verificação falha.
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: fotos
+          path: fotos/
+          if-no-files-found: ignore
+
   build:
     name: build
     runs-on: ubuntu-latest
