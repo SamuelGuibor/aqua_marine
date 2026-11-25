@@ -20,7 +20,7 @@ iniciado por um comando que leva a chave do card. No fim de cada fase o Claude d
 
 | # | Comando | O que faz | O que escreve | Jira |
 | --- | --- | --- | --- | --- |
-| 0 | `/criar-card <demanda>` | Transforma a demanda em card(s) no modelo certo, depois do seu "pode criar" | o card | cria |
+| 0 | `/criar-card <demanda>` | Transforma a demanda em card(s) no modelo certo, depois do seu "pode criar" | o card | cria, já no sprint ativo (épico não) |
 | 1 | `/iniciar-card SCRUM-12` | Branch `SCRUM-12-titulo` a partir da `origin/main`, worktree em `.worktrees/SCRUM-12/`, `.env.local`, `npm ci` | a worktree | atribui a você, "Em andamento" |
 | 2 | `/entender-card SCRUM-12` | Lê card, épico, protótipo e código; tira dúvidas com você; planeja | `.card/contexto.md`, `.card/plano.md` | comenta decisões |
 | 3 | `/implementar-card SCRUM-12` | Implementa o plano em commits pequenos `SCRUM-12 ...`; lint, tipos e build | código + `.card/implementacao.md` | |

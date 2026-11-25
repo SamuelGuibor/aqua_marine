@@ -203,6 +203,27 @@ export async function tipoDeItem(nome) {
   return tipo;
 }
 
+/** Épico não entra em sprint: ele agrupa cards, não é trabalho do quadro. */
+export function ehEpico(tipo) {
+  return tipo?.hierarchyLevel === 1 || ['epic', 'epico'].includes(semAcento(tipo?.name ?? ''));
+}
+
+/** Sprint ativo do quadro do projeto, ou null. Ids buscados a cada chamada, nunca fixos no código. */
+export async function sprintAtivo() {
+  const { values: quadros = [] } = await api('GET', `/rest/agile/1.0/board?projectKeyOrId=${PROJETO}`);
+  // Quadro de projeto team-managed vem como `simple`; quadro sem sprint (Kanban) responde erro e é pulado.
+  for (const quadro of quadros) {
+    const resposta = await api('GET', `/rest/agile/1.0/board/${quadro.id}/sprint?state=active`).catch(() => null);
+    const sprints = resposta?.values ?? [];
+    if (sprints.length) return { id: sprints[0].id, nome: sprints[0].name, quadro: quadro.name };
+  }
+  return null;
+}
+
+export async function colocarNoSprint(chave, sprintId) {
+  await api('POST', `/rest/agile/1.0/sprint/${sprintId}/issue`, { issues: [chave] });
+}
+
 // ------------------------------------------------------------ ADF -> Markdown
 
 function inlineMd(nos = []) {

@@ -2,8 +2,8 @@
 // Jira pela REST API v3, para os comandos do harness. Uso: node scripts/harness/jira.mjs ajuda
 import { readFileSync } from 'node:fs';
 import {
-  Falha, PROJETO, adfParaMd, api, buscarCard, buscarJql, chaveDoCard, comentar, lerArgs,
-  mdParaAdf, moverCard, principal, tipoDeItem, urlDoCard,
+  Falha, PROJETO, adfParaMd, api, buscarCard, buscarJql, chaveDoCard, colocarNoSprint, comentar, ehEpico, lerArgs,
+  mdParaAdf, moverCard, principal, sprintAtivo, tipoDeItem, urlDoCard,
 } from './lib.mjs';
 
 const AJUDA = `Jira do projeto ${PROJETO} (REST API v3). Credenciais: JIRA_* no .env.local.
@@ -16,9 +16,11 @@ const AJUDA = `Jira do projeto ${PROJETO} (REST API v3). Credenciais: JIRA_* no 
   mover ${PROJETO}-12 "Em andamento"       muda o status
   atribuir ${PROJETO}-12                   atribui o card ao dono do token
   comentar ${PROJETO}-12 --arquivo x.md    comenta (Markdown). Ou --texto "uma linha"
-  criar --tipo Tarefa --arquivo x.md [--pai ${PROJETO}-5] [--label injetora] [--dry-run]
+  criar --tipo Tarefa --arquivo x.md [--pai ${PROJETO}-5] [--label injetora] [--dry-run] [--sem-sprint]
                                       cria o card. A 1ª linha "# Título" do arquivo vira o título
                                       (ou passe --titulo). Tipos: Epic, História, Tarefa, Subtask
+                                      O card entra no sprint ativo do quadro (épico não;
+                                      --sem-sprint deixa no backlog)
   editar ${PROJETO}-12 --arquivo x.md      troca título e descrição pelo arquivo (ou só --titulo "...")
 
 Textos longos sempre por arquivo: o PowerShell 5.1 quebra aspas e acentos em argumentos.`;
@@ -143,13 +145,27 @@ const comandos = {
     if (tipo.subtask && !fields.parent) throw new Falha('Subtask precisa de --pai SCRUM-xx.');
     const labels = [].concat(flags.label ?? []).filter((l) => l !== true);
     if (labels.length) fields.labels = labels;
+    // Card novo entra no sprint ativo, para aparecer no quadro (SCRUM-96).
+    const semSprint = ehEpico(tipo) ? 'é um épico: não entra em sprint'
+      : flags['sem-sprint'] ? 'ficou no backlog (--sem-sprint)' : null;
+    const sprint = semSprint ? null : await sprintAtivo();
+    const destino = semSprint ?? (sprint ? `entra no sprint "${sprint.nome}" (${sprint.quadro})` : 'sem sprint ativo: ficou no backlog');
     if (flags['dry-run']) {
       console.log(`[dry-run] Nada foi criado. Seria enviado (tipo ${tipo.name}):`);
       console.log(JSON.stringify({ fields }, null, 2));
+      console.log(`Sprint: ${destino}.`);
       return;
     }
     const novo = await api('POST', '/rest/api/3/issue', { fields });
     console.log(`Criado ${novo.key} (${tipo.name}): ${titulo}\n${urlDoCard(novo.key)}`);
+    if (!sprint) { console.log(`Sprint: ${destino}.`); return; }
+    try {
+      await colocarNoSprint(novo.key, sprint.id);
+      console.log(`Sprint: ${novo.key} ${destino}.`);
+    } catch (e) {
+      // O card já existe: o sprint não derruba o comando.
+      console.log(`Sprint: não consegui colocar no sprint "${sprint.nome}" (${e.message}). O card ficou no backlog.`);
+    }
   },
 
   async editar({ pos, flags }) {
