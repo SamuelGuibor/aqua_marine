@@ -43,7 +43,7 @@ Guia completo: `docs/harness/README.md`. Modelo de card: `docs/harness/modelo-de
 
 - `main` = produção (deploy automático na Vercel, região `gru1` em `vercel.json`). Tudo entra por PR.
 - Segredos só no `.env.local` (fora do Git). Variável nova: acrescente o nome no `.env.example`.
-- Comandos: `npm run dev`, `npm run build`, `npm run lint`.
+- Comandos: `npm run dev`, `npm run build`, `npm run lint`, `npm run tipos`, `npm test`, `npm run test:ver`.
   Banco: `npm run db:gerar` (migration a partir de `lib/db/schema.ts`), `npm run db:migrar`, `npm run db:seed`.
 
 ## Jira
