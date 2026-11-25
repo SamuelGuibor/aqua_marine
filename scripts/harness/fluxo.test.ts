@@ -9,6 +9,7 @@ import {
   escolherPr,
   motivoParaNaoEncerrar,
   proximoPasso,
+  relatorioVale,
   situacaoAposMescla,
   trazerCommitDoPr,
 } from "./fluxo.mjs";
@@ -393,5 +394,99 @@ describe("motivoParaNaoEncerrar", COM_GIT, () => {
 
   test("recusa quando não dá para comparar", () => {
     expect(motivo(repositorio(), "0".repeat(40))).toContain("Não deu para comparar");
+  });
+});
+
+describe("relatorioVale: o que vem depois da revisão e da auditoria (SCRUM-98)", COM_GIT, () => {
+  /** Repositório com o relatório escrito no HEAD do card (o commit "parte A"). */
+  function comRelatorio() {
+    const r = repositorio();
+    const vale = () => relatorioVale({ commit: r.mesclado, cwd: r.pasta });
+    const mesclarMain = () => r.g("merge", "--no-edit", "main");
+    return { ...r, vale, mesclarMain };
+  }
+
+  test("nada depois: vale", () => {
+    expect(comRelatorio().vale()).toBe(true);
+  });
+
+  test("CA1: só um merge limpo da main: vale", () => {
+    const r = comRelatorio();
+    r.naMain(() => r.commit("main.txt", "main andou"));
+    r.mesclarMain();
+    expect(r.vale()).toBe(true);
+  });
+
+  test("commit de trabalho: não vale", () => {
+    const r = comRelatorio();
+    r.commit("parte-b.txt", "parte B");
+    expect(r.vale()).toBe(false);
+  });
+
+  test("CA2: merge da main com conflito resolvido à mão: não vale", () => {
+    const r = comRelatorio();
+    r.naMain(() => r.commit("parte-a.txt", "main mexeu no mesmo arquivo"));
+    expect(() => r.mesclarMain()).toThrow();
+    r.escrever("parte-a.txt", "resolvido à mão");
+    r.g("add", "parte-a.txt");
+    r.g("commit", "--no-edit");
+    expect(r.vale()).toBe(false);
+  });
+
+  test("CA3: merge sem conflito, mas com mudança além do automático: não vale", () => {
+    const r = comRelatorio();
+    r.naMain(() => r.commit("main.txt", "main andou"));
+    r.g("merge", "--no-commit", "--no-ff", "main");
+    r.escrever("extra.txt", "editado antes do commit do merge");
+    r.g("add", "extra.txt");
+    r.g("commit", "--no-edit");
+    expect(r.vale()).toBe(false);
+  });
+
+  test("CA5: merge com conflito continua invalidando depois de um merge limpo", () => {
+    const r = comRelatorio();
+    r.naMain(() => r.commit("parte-a.txt", "main mexeu no mesmo arquivo"));
+    expect(() => r.mesclarMain()).toThrow();
+    r.escrever("parte-a.txt", "resolvido à mão");
+    r.g("add", "parte-a.txt");
+    r.g("commit", "--no-edit");
+    r.naMain(() => r.commit("main2.txt", "main andou de novo"));
+    r.mesclarMain();
+    expect(r.vale()).toBe(false);
+  });
+
+  test("CA6: merge limpo de outra branch que não a main: não vale", () => {
+    const r = comRelatorio();
+    r.g("checkout", "-q", "-b", "outra", "main");
+    r.commit("outra.txt", "outra branch");
+    r.g("checkout", "-q", "card");
+    r.g("merge", "--no-edit", "outra");
+    expect(r.vale()).toBe(false);
+  });
+
+  test("sem origin/main não dá para comparar: não vale", () => {
+    const r = comRelatorio();
+    r.g("update-ref", "-d", "refs/remotes/origin/main");
+    expect(r.vale()).toBe(false);
+  });
+
+  test("relatório de um commit que não está na branch: não vale", () => {
+    const r = comRelatorio();
+    r.g("checkout", "-q", "-b", "solta", "main");
+    r.commit("solta.txt", "solta");
+    r.g("checkout", "-q", "card");
+    expect(relatorioVale({ commit: r.g("rev-parse", "solta"), cwd: r.pasta })).toBe(false);
+  });
+});
+
+describe("proximoPasso com revisão e auditoria invalidadas (SCRUM-98)", () => {
+  test("CA2 e CA4: manda revisar de novo e não sugere publicar", () => {
+    const vencidas = {
+      ...relatorios,
+      "revisao.md": { veredito: "APROVADO", vale: false },
+      "auditoria.md": { veredito: "LIBERADO", vale: false },
+    };
+    const [comando] = proximoPasso(situacao({ relatorios: vencidas }));
+    expect(comando).toBe(`/revisar-card ${K}`);
   });
 });

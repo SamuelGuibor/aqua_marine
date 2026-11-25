@@ -8,7 +8,9 @@ import {
   Falha, PASTA_CARD, PASTA_WORKTREES, PROJETO, STATUS, api, branchDoCard, buscarCard, chaveDoCard, git,
   lerArgs, moverCard, pastaPrincipal, principal, slug, urlDoCard, worktreeDoCard,
 } from './lib.mjs';
-import { compararComMescla, escolherPr, motivoParaNaoEncerrar, proximoPasso, trazerCommitDoPr } from './fluxo.mjs';
+import {
+  compararComMescla, escolherPr, motivoParaNaoEncerrar, proximoPasso, relatorioVale, trazerCommitDoPr,
+} from './fluxo.mjs';
 
 const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, branch ${PROJETO}-xx-titulo, relatórios em ${PASTA_CARD}/.
 
@@ -43,14 +45,9 @@ function cabecalho(arquivo) {
   return campos;
 }
 
-/**
- * O relatório ainda vale para o HEAD? Vale se o commit registrado é ancestral do HEAD e, depois dele,
- * só entraram merges da main (sincronização), nenhum commit de trabalho.
- */
+/** O relatório ainda vale para o HEAD? Só merges limpos da main depois dele (regra em fluxo.mjs, relatorioVale). */
 function valeParaHead(commit, pasta) {
-  if (!commit) return false;
-  if (git(['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: pasta, tolerante: true }) === null) return false;
-  return git(['rev-list', '--count', '--no-merges', '--first-parent', `${commit}..HEAD`], { cwd: pasta }) === '0';
+  return relatorioVale({ commit, cwd: pasta });
 }
 
 function prDaBranch(branch, raiz) {

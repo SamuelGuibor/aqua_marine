@@ -33,7 +33,10 @@ iniciado por um comando que leva a chave do card. No fim de cada fase o Claude d
 
 - Revisão deu `AJUSTES` ou auditoria deu `BLOQUEADO` → chat novo com `/implementar-card SCRUM-12`. Ele lê o relatório e corrige só as pendências.
 - **Todo commit novo invalida a revisão e a auditoria anteriores.** Depois de corrigir, as duas rodam de novo. O `status` mostra `DESATUALIZADO` e o `/publicar-pr` se recusa a seguir.
-  (Exceção: o merge limpo da `main` feito pela própria auditoria não invalida a revisão.)
+  (Exceção: o merge limpo da `main` não invalida a revisão nem a auditoria. "Limpo" é o merge que o Git faz sozinho,
+  sem conflito e sem nenhuma mudança a mais. Merge com conflito resolvido à mão, merge com arquivo editado antes do commit
+  e merge de outra branch que não a `main` invalidam os dois, mesmo que depois entre um merge limpo: o `status` mostra
+  `DESATUALIZADO` e manda para `/revisar-card`.)
 - Pediram mudança no PR → `/implementar-card` → `/revisar-card` → `/auditar-codigo` → `/publicar-pr` (com o PR ainda aberto,
   atualiza o mesmo PR; PR já mesclado não é editado).
 

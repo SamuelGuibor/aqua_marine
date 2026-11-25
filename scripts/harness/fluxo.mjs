@@ -24,6 +24,34 @@ function mergeSoSincronizou(sha, pais, ler) {
 }
 
 /**
+ * O merge é um merge limpo da main? Um dos pais está na origin/main e a árvore é exatamente a que o Git
+ * produz sozinho juntando os dois pais, sem conflito (merge-tree sai com código 1 quando há conflito).
+ */
+function mergeLimpoDaMain(sha, pais, ler) {
+  const daMain = pais.some((pai) => ler(['merge-base', '--is-ancestor', pai, 'refs/remotes/origin/main']) !== null);
+  if (!daMain) return false;
+  const arvore = ler(['rev-parse', `${sha}^{tree}`]);
+  return arvore !== null && ler(['merge-tree', '--write-tree', ...pais])?.split('\n')[0] === arvore;
+}
+
+/**
+ * A revisão ou a auditoria escrita no `commit` ainda vale para `ref`? Vale se o commit é ancestral de `ref` e,
+ * depois dele, só entraram merges limpos da main. Invalida: commit de trabalho, merge com conflito resolvido à
+ * mão, merge com mudança além da automática e merge de outra branch que não a main (SCRUM-98).
+ * Se a comparação não puder ser feita (sem origin/main, Git anterior ao 2.38), o relatório não vale.
+ */
+export function relatorioVale({ commit, cwd, ref = 'HEAD' }) {
+  const ler = (args) => git(args, { cwd, tolerante: true });
+  if (!commit || ler(['merge-base', '--is-ancestor', commit, ref]) === null) return false;
+  const saida = ler(['rev-list', '--parents', ref, `^${commit}`, '^refs/remotes/origin/main']);
+  if (saida === null) return false;
+  return saida.split('\n').filter(Boolean).every((linha) => {
+    const [sha, ...pais] = linha.trim().split(' ');
+    return pais.length === 2 && mergeLimpoDaMain(sha, pais, ler);
+  });
+}
+
+/**
  * O que `ref` tem além do que o PR mesclado levou (`commitMesclado` é o headRefOid dele):
  * 'coberto' (nada, ou só a main recebida), 'trabalho-novo' ou 'indefinido' (não deu para comparar).
  */
@@ -96,10 +124,10 @@ export function proximoPasso(s) {
   if (!r['implementacao.md']) return [`/implementar-card ${k}`, 'o plano ainda não foi implementado'];
   if (s.sujo.length) return [`/implementar-card ${k}`, 'há mudanças sem commit na worktree'];
   const rev = r['revisao.md'];
-  if (!rev || !rev.vale) return [`/revisar-card ${k}`, rev ? 'entrou commit depois da última revisão' : 'ainda não foi revisado'];
+  if (!rev || !rev.vale) return [`/revisar-card ${k}`, rev ? 'entrou commit (ou merge com conflito) depois da última revisão' : 'ainda não foi revisado'];
   if (rev.veredito !== 'APROVADO') return [`/implementar-card ${k}`, 'a revisão pediu ajustes'];
   const aud = r['auditoria.md'];
-  if (!aud || !aud.vale) return [`/auditar-codigo ${k}`, aud ? 'entrou commit depois da última auditoria' : 'ainda não foi auditado'];
+  if (!aud || !aud.vale) return [`/auditar-codigo ${k}`, aud ? 'entrou commit (ou merge com conflito) depois da última auditoria' : 'ainda não foi auditado'];
   if (aud.veredito !== 'LIBERADO') return [`/implementar-card ${k}`, 'a auditoria bloqueou'];
   if (s.atras > 0) return [`/auditar-codigo ${k}`, `a main andou ${s.atras} commit(s) depois da auditoria`];
   if (pr?.state === 'MERGED') {
