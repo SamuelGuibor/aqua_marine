@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:ver": "vitest",
     "teste:larguras": "playwright test",
+    "fotos": "node scripts/fotos.mjs",
     "db:gerar": "drizzle-kit generate",
     "db:migrar": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed.ts"
