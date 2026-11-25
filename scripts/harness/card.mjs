@@ -8,7 +8,7 @@ import {
   Falha, PASTA_CARD, PASTA_WORKTREES, PROJETO, STATUS, api, branchDoCard, buscarCard, chaveDoCard, git,
   lerArgs, moverCard, pastaPrincipal, principal, slug, urlDoCard, worktreeDoCard,
 } from './lib.mjs';
-import { compararComMescla, escolherPr, proximoPasso, trazerCommitDoPr } from './fluxo.mjs';
+import { compararComMescla, escolherPr, motivoParaNaoEncerrar, proximoPasso, trazerCommitDoPr } from './fluxo.mjs';
 
 const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, branch ${PROJETO}-xx-titulo, relatórios em ${PASTA_CARD}/.
 
@@ -18,6 +18,7 @@ const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, b
                                   copia o .env.local, roda npm ci, atribui o card e move para "${STATUS.fazendo}"
   encerrar ${PROJETO}-12 [--confirmar] depois do PR mesclado: remove worktree e branch local, atualiza a main,
                                   move o card para "${STATUS.pronto}". Sem --confirmar só mostra o que faria.
+                                  Recusa se houver commit do card que não entrou em PR mesclado.
 
 Opções: --sem-jira (não lê nem altera o Jira) · --sem-instalar (pula o npm ci) · --sem-fetch
         encerrar --abandonar (descarta um card que NÃO foi mesclado; apaga o trabalho local)`;
@@ -291,6 +292,9 @@ async function encerrar({ pos, flags }) {
     if (!gh.ok) throw new Falha(`Não consegui consultar o PR (${gh.erro}). Rode "gh auth status".`);
     if (!gh.pr) throw new Falha(`${branch} não tem PR. Se o card foi desistido, use --abandonar (apaga o trabalho local).`);
     if (gh.pr.state !== 'MERGED') throw new Falha(`O PR #${gh.pr.number} está ${gh.pr.state}, não mesclado. Encerrar é só depois do merge (${gh.pr.url}).`);
+    trazerCommitDoPr(gh.pr, raiz);
+    const motivo = motivoParaNaoEncerrar({ chave, pr: gh.pr, branch, cwd: raiz });
+    if (motivo) throw new Falha(motivo);
   }
   const sujo = wt ? linhas(git(['status', '--porcelain'], { cwd: wt.pasta })) : [];
   if (sujo.length && !abandonar) {

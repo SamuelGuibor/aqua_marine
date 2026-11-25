@@ -7,6 +7,7 @@ import { afterAll, describe, expect, test } from "vitest";
 import {
   compararComMescla,
   escolherPr,
+  motivoParaNaoEncerrar,
   proximoPasso,
   situacaoAposMescla,
   trazerCommitDoPr,
@@ -361,5 +362,36 @@ describe("trazerCommitDoPr", COM_GIT, () => {
     trazerCommitDoPr({ number: 7, headRefOid: soNoGitHub }, maquina.pasta);
     // com o commit na máquina, já dá para comparar
     expect(situacao()).not.toBe("indefinido");
+  });
+});
+
+describe("motivoParaNaoEncerrar", COM_GIT, () => {
+  type Repo = ReturnType<typeof repositorio>;
+  const motivo = (r: Repo, headRefOid = r.mesclado) =>
+    motivoParaNaoEncerrar({ chave: K, pr: { number: 7, headRefOid }, branch: "card", cwd: r.pasta });
+
+  test("libera quando nada ficou fora do PR mesclado", () => {
+    const r = repositorio();
+    r.naMain(() => r.commit("outro.txt", "outro card"));
+    r.g("merge", "-q", "--no-ff", "-m", "merge da main", "main");
+    expect(motivo(r)).toBeNull();
+  });
+
+  test("recusa commit que só está na branch local", () => {
+    const r = repositorio();
+    r.commit("parte-b.txt", "parte B");
+    expect(motivo(r)).toContain("tem commit na branch local que não entrou em PR mesclado");
+    expect(motivo(r)).toContain(`status ${K}`);
+  });
+
+  test("recusa commit que só está no GitHub", () => {
+    const r = repositorio();
+    r.g("update-ref", "refs/remotes/origin/card", r.commit("parte-b.txt", "parte B"));
+    r.g("reset", "-q", "--hard", r.mesclado);
+    expect(motivo(r)).toContain("tem commit no GitHub que não entrou em PR mesclado");
+  });
+
+  test("recusa quando não dá para comparar", () => {
+    expect(motivo(repositorio(), "0".repeat(40))).toContain("Não deu para comparar");
   });
 });

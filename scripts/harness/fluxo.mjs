@@ -57,6 +57,24 @@ export function compararComMescla({ commitMesclado, branch, cwd }) {
   return { local: comparar(`refs/heads/${branch}`), github: temRemota ? comparar(remota) : 'coberto' };
 }
 
+/**
+ * Por que o `encerrar` não pode apagar a branch depois do PR mesclado: a mensagem de recusa, ou null
+ * quando não há nela (aqui ou no GitHub) trabalho fora do que o PR levou. Na dúvida, recusa.
+ */
+export function motivoParaNaoEncerrar({ chave, pr, branch, cwd }) {
+  const { local, github } = compararComMescla({ commitMesclado: pr.headRefOid, branch, cwd });
+  const nada = 'Nada foi apagado nem mudou no Jira.';
+  const onde = [local === 'trabalho-novo' && 'na branch local', github === 'trabalho-novo' && 'no GitHub'].filter(Boolean);
+  if (onde.length) {
+    return `${branch} tem commit ${onde.join(' e ')} que não entrou em PR mesclado (o último foi o #${pr.number}). ${nada}\n`
+      + `O card segue no fluxo: rode "node scripts/harness/card.mjs status ${chave}".`;
+  }
+  if (local === 'indefinido' || github === 'indefinido') {
+    return `Não deu para comparar ${branch} com o commit do PR #${pr.number} mesclado. ${nada} Rode "git fetch" e tente de novo.`;
+  }
+  return null;
+}
+
 /** [comando, motivo] a partir da situação coletada pelo `status`. Sem comando, o motivo diz o que esperar. */
 export function proximoPasso(s) {
   const k = s.chave;
