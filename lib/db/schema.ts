@@ -261,7 +261,7 @@ export const tentativaAcesso = pgTable(
     index("tentativa_acesso_alvo_chave_ocorrido_em_idx").on(
       t.alvo,
       t.chave,
-      t.ocorridoEm.desc(),
+      t.ocorridoEm.desc().nullsFirst(),
     ),
   ],
 );
@@ -288,11 +288,11 @@ export const registroAcao = pgTable(
     userAgent: text("user_agent"),
   },
   (t) => [
-    index("registro_acao_ocorrido_em_idx").on(t.ocorridoEm.desc()),
+    index("registro_acao_ocorrido_em_idx").on(t.ocorridoEm.desc().nullsFirst()),
     index("registro_acao_entidade_idx").on(t.entidade, t.entidadeId),
     index("registro_acao_acao_ocorrido_em_idx").on(
       t.acao,
-      t.ocorridoEm.desc(),
+      t.ocorridoEm.desc().nullsFirst(),
     ),
   ],
 );
