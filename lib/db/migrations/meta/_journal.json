@@ -15,6 +15,13 @@
       "when": 1795577209465,
       "tag": "0002_tablets",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795581878971,
+      "tag": "0003_banco_completo",
+      "breakpoints": true
     }
   ]
 }
