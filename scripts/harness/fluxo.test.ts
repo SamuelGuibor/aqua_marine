@@ -1,6 +1,10 @@
-import { describe, expect, test } from "vitest";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterAll, describe, expect, test } from "vitest";
 
-import { escolherPr, proximoPasso } from "./fluxo.mjs";
+import { escolherPr, proximoPasso, situacaoAposMescla } from "./fluxo.mjs";
 
 const K = "SCRUM-12";
 
@@ -100,5 +104,155 @@ describe("proximoPasso", () => {
     const [cmd, motivo] = proximoPasso(situacao({ faltaEnviar: 0 }, aberto));
     expect(cmd).toBeNull();
     expect(motivo).toContain("PR #9 aberto");
+  });
+});
+
+const pastas: string[] = [];
+afterAll(() => {
+  for (const pasta of pastas) rmSync(pasta, { recursive: true, force: true });
+});
+
+/**
+ * Repositório temporário na situação logo depois de um PR parcial: a `main` com um commit, a branch
+ * `card` com um commit a mais (`mesclado`, o headRefOid do PR) e a `origin/main` ainda no começo.
+ */
+function repositorio() {
+  const pasta = mkdtempSync(path.join(tmpdir(), "harness-"));
+  pastas.push(pasta);
+  const g = (...args: string[]) =>
+    execFileSync("git", args, { cwd: pasta, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  const escrever = (arquivo: string, texto: string) => writeFileSync(path.join(pasta, arquivo), `${texto}\n`);
+  const commit = (arquivo: string, texto: string) => {
+    escrever(arquivo, texto);
+    g("add", arquivo);
+    g("commit", "-m", `${arquivo}: ${texto}`);
+    return g("rev-parse", "HEAD");
+  };
+  const publicarMain = () => g("update-ref", "refs/remotes/origin/main", "refs/heads/main");
+  /** Faz na `main` (e na `origin/main`) o que a função mandar e volta para a branch do card. */
+  const naMain = (fazer: () => void) => {
+    g("checkout", "-q", "main");
+    fazer();
+    publicarMain();
+    g("checkout", "-q", "card");
+  };
+  const mesclarPorSquash = () => naMain(() => {
+    g("merge", "--squash", "card");
+    g("commit", "-m", "squash do card");
+  });
+
+  g("init", "-q", "-b", "main");
+  g("config", "user.name", "Teste");
+  g("config", "user.email", "teste@example.com");
+  g("config", "commit.gpgsign", "false");
+  g("config", "core.autocrlf", "false");
+  commit("base.txt", "base");
+  publicarMain();
+  g("checkout", "-q", "-b", "card");
+  const mesclado = commit("parte-a.txt", "parte A");
+
+  const situacaoDe = (ref = "refs/heads/card", commitMesclado: string | undefined = mesclado) =>
+    situacaoAposMescla({ commitMesclado, ref, cwd: pasta });
+
+  return { pasta, g, escrever, commit, naMain, mesclarPorSquash, mesclado, situacaoDe };
+}
+
+// Criar processos no Windows é lento, e cada caso chama o Git várias vezes.
+const COM_GIT = { timeout: 30_000 };
+
+describe("situacaoAposMescla: a branch só tem o que foi mesclado", COM_GIT, () => {
+  test("o HEAD é o commit mesclado", () => {
+    expect(repositorio().situacaoDe()).toBe("coberto");
+  });
+
+  test("a branch está atrás do commit mesclado", () => {
+    const r = repositorio();
+    r.g("reset", "-q", "--hard", "HEAD~1");
+    expect(r.situacaoDe()).toBe("coberto");
+  });
+
+  test("recebeu a main por avanço rápido", () => {
+    const r = repositorio();
+    r.naMain(() => r.g("merge", "-q", "--no-ff", "-m", "merge do PR", "card"));
+    r.g("merge", "-q", "--ff-only", "main");
+    expect(r.situacaoDe()).toBe("coberto");
+  });
+
+  test("recebeu a main por um merge limpo", () => {
+    const r = repositorio();
+    r.naMain(() => r.commit("outro.txt", "outro card"));
+    r.g("merge", "-q", "--no-ff", "-m", "merge da main", "main");
+    expect(r.situacaoDe()).toBe("coberto");
+  });
+
+  test("PR mesclado por squash e a main recebida depois", () => {
+    const r = repositorio();
+    r.mesclarPorSquash();
+    r.g("merge", "-q", "--no-ff", "-m", "merge da main", "main");
+    expect(r.situacaoDe()).toBe("coberto");
+  });
+
+  test("squash com conflito resolvido com a versão da main", () => {
+    const r = repositorio();
+    r.mesclarPorSquash();
+    r.naMain(() => r.commit("parte-a.txt", "parte A alterada na main"));
+    expect(() => r.g("merge", "--no-ff", "main")).toThrow();
+    r.g("checkout", "--theirs", "parte-a.txt");
+    r.g("add", "parte-a.txt");
+    r.g("commit", "-m", "merge da main");
+    expect(r.situacaoDe()).toBe("coberto");
+  });
+});
+
+describe("situacaoAposMescla: sobrou trabalho do card", COM_GIT, () => {
+  test("commit novo depois do merge", () => {
+    const r = repositorio();
+    r.commit("parte-b.txt", "parte B");
+    expect(r.situacaoDe()).toBe("trabalho-novo");
+  });
+
+  test("commit novo depois de receber a main", () => {
+    const r = repositorio();
+    r.naMain(() => r.commit("outro.txt", "outro card"));
+    r.g("merge", "-q", "--no-ff", "-m", "merge da main", "main");
+    r.commit("parte-b.txt", "parte B");
+    expect(r.situacaoDe()).toBe("trabalho-novo");
+  });
+
+  test("merge da main com mudança feita à mão", () => {
+    const r = repositorio();
+    r.naMain(() => r.commit("outro.txt", "outro card"));
+    r.g("merge", "-q", "--no-ff", "--no-commit", "main");
+    r.escrever("parte-a.txt", "mexido durante o merge");
+    r.g("add", "parte-a.txt");
+    r.g("commit", "-m", "merge da main");
+    expect(r.situacaoDe()).toBe("trabalho-novo");
+  });
+
+  test("merge de uma branch que não é a main", () => {
+    const r = repositorio();
+    r.g("checkout", "-q", "-b", "outra", "main");
+    r.commit("outra.txt", "outra branch");
+    r.g("checkout", "-q", "card");
+    r.g("merge", "-q", "--no-ff", "-m", "merge de outra", "outra");
+    expect(r.situacaoDe()).toBe("trabalho-novo");
+  });
+});
+
+describe("situacaoAposMescla: não dá para comparar", COM_GIT, () => {
+  test("sem o commit mesclado nesta máquina", () => {
+    const r = repositorio();
+    expect(r.situacaoDe("refs/heads/card", "0".repeat(40))).toBe("indefinido");
+    expect(situacaoAposMescla({ commitMesclado: undefined, ref: "refs/heads/card", cwd: r.pasta })).toBe("indefinido");
+  });
+
+  test("sem origin/main", () => {
+    const r = repositorio();
+    r.g("update-ref", "-d", "refs/remotes/origin/main");
+    expect(r.situacaoDe()).toBe("indefinido");
+  });
+
+  test("ref que não existe", () => {
+    expect(repositorio().situacaoDe("refs/heads/sumiu")).toBe("indefinido");
   });
 });
