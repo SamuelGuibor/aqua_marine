@@ -13,6 +13,7 @@
     "tipos": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:ver": "vitest",
+    "teste:larguras": "playwright test",
     "db:gerar": "drizzle-kit generate",
     "db:migrar": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed.ts"
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@next/env": "16.4.6",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.7",
     "@types/react": "19.3.1",
     "@types/react-dom": "19.3.0",

@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Saídas da conferência de larguras (docs/larguras.md).
+    "fotos/**",
+    "test-results/**",
+    "playwright-report/**",
     // Worktrees dos cards (docs/harness): cada uma roda o próprio lint.
     ".worktrees/**",
   ]),
