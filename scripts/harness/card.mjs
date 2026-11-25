@@ -8,6 +8,7 @@ import {
   Falha, PASTA_CARD, PASTA_WORKTREES, PROJETO, STATUS, api, branchDoCard, buscarCard, chaveDoCard, git,
   lerArgs, moverCard, pastaPrincipal, principal, slug, urlDoCard, worktreeDoCard,
 } from './lib.mjs';
+import { escolherPr, proximoPasso } from './fluxo.mjs';
 
 const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, branch ${PROJETO}-xx-titulo, relatórios em ${PASTA_CARD}/.
 
@@ -53,12 +54,9 @@ function valeParaHead(commit, pasta) {
 
 function prDaBranch(branch, raiz) {
   try {
-    const saida = execFileSync('gh', ['pr', 'list', '--head', branch, '--state', 'all', '--limit', '5',
-      '--json', 'number,state,url,isDraft,mergedAt'], { cwd: raiz, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    const prs = JSON.parse(saida);
-    // o mais relevante: aberto > mesclado > fechado
-    const ordem = { OPEN: 0, MERGED: 1, CLOSED: 2 };
-    return { ok: true, pr: prs.sort((a, b) => ordem[a.state] - ordem[b.state])[0] || null };
+    const saida = execFileSync('gh', ['pr', 'list', '--head', branch, '--state', 'all', '--limit', '20',
+      '--json', 'number,state,url,isDraft,mergedAt,headRefOid'], { cwd: raiz, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return { ok: true, pr: escolherPr(JSON.parse(saida)) };
   } catch (e) {
     return { ok: false, erro: String(e.stderr || e.message).trim().split('\n')[0] };
   }
@@ -119,27 +117,6 @@ async function coletar(chave, flags) {
   }
   s.gh = prDaBranch(wt.branch, raiz);
   return s;
-}
-
-function proximoPasso(s) {
-  const k = s.chave;
-  const r = s.relatorios ?? {};
-  const pr = s.gh?.pr;
-  if (pr?.state === 'MERGED') return [`/encerrar-card ${k}`, 'o PR já foi mesclado'];
-  if (!s.worktree) return [`/iniciar-card ${k}`, 'o card ainda não tem worktree nesta máquina'];
-  if (!r['contexto.md'] || !r['plano.md']) return [`/entender-card ${k}`, 'falta o contexto e o plano'];
-  if (!r['implementacao.md']) return [`/implementar-card ${k}`, 'o plano ainda não foi implementado'];
-  if (s.sujo.length) return [`/implementar-card ${k}`, 'há mudanças sem commit na worktree'];
-  const rev = r['revisao.md'];
-  if (!rev || !rev.vale) return [`/revisar-card ${k}`, rev ? 'entrou commit depois da última revisão' : 'ainda não foi revisado'];
-  if (rev.veredito !== 'APROVADO') return [`/implementar-card ${k}`, 'a revisão pediu ajustes'];
-  const aud = r['auditoria.md'];
-  if (!aud || !aud.vale) return [`/auditar-codigo ${k}`, aud ? 'entrou commit depois da última auditoria' : 'ainda não foi auditado'];
-  if (aud.veredito !== 'LIBERADO') return [`/implementar-card ${k}`, 'a auditoria bloqueou'];
-  if (s.atras > 0) return [`/auditar-codigo ${k}`, `a main andou ${s.atras} commit(s) depois da auditoria`];
-  if (!pr || pr.state === 'CLOSED') return [`/publicar-pr ${k}`, 'revisado e auditado, falta o PR'];
-  if (s.faltaEnviar > 0) return [`/publicar-pr ${k}`, 'há commits locais que ainda não foram para o PR'];
-  return [null, `PR #${pr.number} aberto: aguardando teste e merge. Depois do merge: /encerrar-card ${k}`];
 }
 
 function imprimir(s) {
