@@ -44,10 +44,15 @@ export function VistaExemplo({
     <div className={rola ? "casca-rola" : "casca-cabe"}>
       <header className="flex items-center justify-between gap-3 border-b border-borda-nav bg-nav px-4 py-3 tablet:px-6">
         <Logo tamanho={24} />
-        <p className="hidden text-16 text-texto-apoio posto:flex">
+        {/* Os data-corte são o que tests/larguras/cortes.larguras.ts confere. */}
+        <p
+          data-corte="posto-flex"
+          className="hidden text-16 text-texto-apoio posto:flex"
+        >
           Conferência de larguras
         </p>
         <a
+          data-corte="h-toque"
           href="#trocar-de-area"
           className="h-toque inline-flex items-center px-2 text-16 font-semibold text-acao-claro"
         >
@@ -70,7 +75,10 @@ export function VistaExemplo({
         <p className="text-14 font-semibold uppercase text-texto-apoio">
           Produção de hoje · meta {meta} por setor
         </p>
-        <p className="text-14 text-texto-apoio tablet:hidden">
+        <p
+          data-corte="tablet-hidden"
+          className="text-14 text-texto-apoio tablet:hidden"
+        >
           Role a página para ver todos os setores.
         </p>
 
