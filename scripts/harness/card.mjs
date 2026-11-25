@@ -8,7 +8,7 @@ import {
   Falha, PASTA_CARD, PASTA_WORKTREES, PROJETO, STATUS, api, branchDoCard, buscarCard, chaveDoCard, git,
   lerArgs, moverCard, pastaPrincipal, principal, slug, urlDoCard, worktreeDoCard,
 } from './lib.mjs';
-import { escolherPr, proximoPasso } from './fluxo.mjs';
+import { compararComMescla, escolherPr, proximoPasso, trazerCommitDoPr } from './fluxo.mjs';
 
 const AJUDA = `Card na máquina: worktree em ${PASTA_WORKTREES}/${PROJETO}-xx, branch ${PROJETO}-xx-titulo, relatórios em ${PASTA_CARD}/.
 
@@ -116,6 +116,11 @@ async function coletar(chave, flags) {
     s.relatorios[nome] = { ...campos, vale: campos.commit ? valeParaHead(campos.commit, cwd) : null };
   }
   s.gh = prDaBranch(wt.branch, raiz);
+  const pr = s.gh.pr;
+  if (pr?.state === 'MERGED') {
+    if (!flags['sem-fetch']) trazerCommitDoPr(pr, cwd);
+    s.aposMescla = compararComMescla({ commitMesclado: pr.headRefOid, branch: wt.branch, cwd });
+  }
   return s;
 }
 

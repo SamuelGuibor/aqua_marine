@@ -4,7 +4,13 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, test } from "vitest";
 
-import { escolherPr, proximoPasso, situacaoAposMescla } from "./fluxo.mjs";
+import {
+  compararComMescla,
+  escolherPr,
+  proximoPasso,
+  situacaoAposMescla,
+  trazerCommitDoPr,
+} from "./fluxo.mjs";
 
 const K = "SCRUM-12";
 
@@ -100,10 +106,71 @@ describe("proximoPasso", () => {
     expect(comando(situacao({ faltaEnviar: 1 }, aberto))).toBe(`/publicar-pr ${K}`);
   });
 
-  test("PR aberto e tudo enviado: aguardar", () => {
+  test("PR aberto e tudo enviado: aguardar, avisando que PR parcial não encerra o card", () => {
     const [cmd, motivo] = proximoPasso(situacao({ faltaEnviar: 0 }, aberto));
     expect(cmd).toBeNull();
     expect(motivo).toContain("PR #9 aberto");
+    expect(motivo).toContain(`Depois do merge: /encerrar-card ${K}`);
+    expect(motivo).toContain("Se o PR for parcial, não encerre");
+    expect(motivo).toContain('"Em andamento"');
+    expect(motivo).toContain(`/implementar-card ${K}`);
+  });
+});
+
+describe("proximoPasso com o último PR mesclado", () => {
+  const mesclado: Pr = { number: 7, state: "MERGED", mergedAt: "2026-11-25T10:00:00Z" };
+  const coberto = { local: "coberto", github: "coberto" };
+  const comTrabalho = { local: "trabalho-novo", github: "coberto" };
+  const depois = (mudancas: Record<string, unknown>) => proximoPasso(situacao(mudancas, mesclado));
+
+  test("sem trabalho além do mesclado: encerrar", () => {
+    expect(depois({ aposMescla: coberto })[0]).toBe(`/encerrar-card ${K}`);
+    // como o SCRUM-36 logo depois da primeira parte: relatórios valendo e a main um commit à frente
+    expect(depois({ aposMescla: coberto, atras: 1 })[0]).toBe(`/encerrar-card ${K}`);
+  });
+
+  test("com commit novo: segue o fluxo normal", () => {
+    expect(depois({ aposMescla: comTrabalho, sujo: [" M a.txt"] })[0]).toBe(`/implementar-card ${K}`);
+    const revisaoVencida = { ...relatorios, "revisao.md": { veredito: "APROVADO", vale: false } };
+    expect(depois({ aposMescla: comTrabalho, relatorios: revisaoVencida })[0]).toBe(`/revisar-card ${K}`);
+    const auditoriaVencida = { ...relatorios, "auditoria.md": { veredito: "LIBERADO", vale: false } };
+    expect(depois({ aposMescla: comTrabalho, relatorios: auditoriaVencida })[0]).toBe(`/auditar-codigo ${K}`);
+  });
+
+  test.each([
+    ["branch apagada no merge", { publicada: false }],
+    ["commits por enviar", { publicada: true, faltaEnviar: 2 }],
+    ["commits já no GitHub", { publicada: true, faltaEnviar: 0 }],
+  ])("revisado e liberado, %s: publicar um PR novo", (_caso, mudancas) => {
+    const aposMescla = { local: "trabalho-novo", github: "trabalho-novo" };
+    const [cmd, motivo] = depois({ aposMescla, ...mudancas });
+    expect(cmd).toBe(`/publicar-pr ${K}`);
+    expect(motivo).toContain("#7 já foi mesclado");
+    expect(motivo).toContain("PR novo");
+  });
+
+  test("com o PR novo aberto volta a aguardar, citando o novo", () => {
+    const [cmd, motivo] = proximoPasso(situacao({ faltaEnviar: 0 }, escolherPr([mesclado, aberto])));
+    expect(cmd).toBeNull();
+    expect(motivo).toContain("PR #9 aberto");
+    expect(motivo).not.toContain("#7");
+  });
+
+  test.each([
+    ["sem comparação", undefined],
+    ["local indefinido", { local: "indefinido", github: "coberto" }],
+    ["GitHub indefinido", { local: "coberto", github: "indefinido" }],
+  ])("%s: não manda encerrar nem publicar", (_caso, aposMescla) => {
+    const [cmd, motivo] = depois({ aposMescla });
+    expect(cmd).toBeNull();
+    expect(motivo).toContain("não deu para comparar");
+    expect(motivo).toContain("#7");
+  });
+
+  test("commit novo só no GitHub: puxar antes, sem encerrar", () => {
+    const [cmd, motivo] = depois({ aposMescla: { local: "coberto", github: "trabalho-novo" } });
+    expect(cmd).toBeNull();
+    expect(motivo).toContain("git pull --ff-only");
   });
 });
 
@@ -254,5 +321,45 @@ describe("situacaoAposMescla: não dá para comparar", COM_GIT, () => {
 
   test("ref que não existe", () => {
     expect(repositorio().situacaoDe("refs/heads/sumiu")).toBe("indefinido");
+  });
+});
+
+describe("compararComMescla", COM_GIT, () => {
+  type Repo = ReturnType<typeof repositorio>;
+  const comparar = (r: Repo) => compararComMescla({ commitMesclado: r.mesclado, branch: "card", cwd: r.pasta });
+  const noGitHub = (r: Repo, sha: string) => r.g("update-ref", "refs/remotes/origin/card", sha);
+
+  test("branch apagada no GitHub conta como coberta", () => {
+    expect(comparar(repositorio())).toEqual({ local: "coberto", github: "coberto" });
+  });
+
+  test("commit que só está na branch local", () => {
+    const r = repositorio();
+    noGitHub(r, r.mesclado);
+    r.commit("parte-b.txt", "parte B");
+    expect(comparar(r)).toEqual({ local: "trabalho-novo", github: "coberto" });
+  });
+
+  test("commit que só está no GitHub", () => {
+    const r = repositorio();
+    noGitHub(r, r.commit("parte-b.txt", "parte B"));
+    r.g("reset", "-q", "--hard", r.mesclado);
+    expect(comparar(r)).toEqual({ local: "coberto", github: "trabalho-novo" });
+  });
+});
+
+describe("trazerCommitDoPr", COM_GIT, () => {
+  test("busca no GitHub o commit do PR que a máquina não tem", () => {
+    const github = repositorio();
+    const maquina = repositorio();
+    maquina.g("remote", "add", "origin", github.pasta);
+    // um commit que só existe no outro repositório, na referência do PR como no GitHub
+    const soNoGitHub = github.commit("parte-b.txt", "parte B enviada por outra pessoa");
+    github.g("update-ref", "refs/pull/7/head", soNoGitHub);
+    const situacao = () => maquina.situacaoDe("refs/heads/card", soNoGitHub);
+    expect(situacao()).toBe("indefinido");
+    trazerCommitDoPr({ number: 7, headRefOid: soNoGitHub }, maquina.pasta);
+    // com o commit na máquina, já dá para comparar
+    expect(situacao()).not.toBe("indefinido");
   });
 });

@@ -1,6 +1,6 @@
 // Decisões do fluxo de cards: qual PR da branch vale, o que sobrou depois do merge e qual é o próximo passo.
 // Fica fora do card.mjs para poder ser testado: importar este módulo não executa nada.
-import { git } from './lib.mjs';
+import { STATUS, git } from './lib.mjs';
 
 /** O PR mais relevante da branch: aberto > mesclado > fechado; entre os mesclados, o mais recente. */
 export function escolherPr(prs) {
@@ -40,12 +40,39 @@ export function situacaoAposMescla({ commitMesclado, ref, cwd }) {
   return coberto ? 'coberto' : 'trabalho-novo';
 }
 
+/** Traz do GitHub o commit que o PR levou, se esta máquina não o tem (ex.: a branch já foi apagada lá). */
+export function trazerCommitDoPr(pr, cwd) {
+  if (!pr.headRefOid || git(['cat-file', '-e', `${pr.headRefOid}^{commit}`], { cwd, tolerante: true }) !== null) return;
+  git(['fetch', 'origin', `refs/pull/${pr.number}/head`], { cwd, tolerante: true });
+}
+
+/**
+ * Compara com o commit do PR mesclado a branch local e a do GitHub (outra pessoa pode ter enviado a parte
+ * seguinte). Branch que não existe mais no GitHub não tem nada a mais: conta como 'coberto'.
+ */
+export function compararComMescla({ commitMesclado, branch, cwd }) {
+  const comparar = (ref) => situacaoAposMescla({ commitMesclado, ref, cwd });
+  const remota = `refs/remotes/origin/${branch}`;
+  const temRemota = git(['rev-parse', '--verify', '--quiet', remota], { cwd, tolerante: true }) !== null;
+  return { local: comparar(`refs/heads/${branch}`), github: temRemota ? comparar(remota) : 'coberto' };
+}
+
 /** [comando, motivo] a partir da situação coletada pelo `status`. Sem comando, o motivo diz o que esperar. */
 export function proximoPasso(s) {
   const k = s.chave;
   const r = s.relatorios ?? {};
   const pr = s.gh?.pr;
-  if (pr?.state === 'MERGED') return [`/encerrar-card ${k}`, 'o PR já foi mesclado'];
+  if (pr?.state === 'MERGED') {
+    // Card entregue em partes: só se encerra quando não sobrou trabalho além do que o PR levou.
+    const { local = 'indefinido', github = 'indefinido' } = s.aposMescla ?? {};
+    if (local === 'indefinido' || github === 'indefinido') {
+      return [null, `não deu para comparar a branch com o commit do PR #${pr.number}, já mesclado. Rode "git fetch" e o status de novo`];
+    }
+    if (local === 'coberto') {
+      if (github === 'coberto') return [`/encerrar-card ${k}`, 'o PR já foi mesclado'];
+      return [null, `o GitHub tem commit posterior ao PR #${pr.number} mesclado que não está nesta worktree. Rode "git pull --ff-only" nela e o status de novo`];
+    }
+  }
   if (!s.worktree) return [`/iniciar-card ${k}`, 'o card ainda não tem worktree nesta máquina'];
   if (!r['contexto.md'] || !r['plano.md']) return [`/entender-card ${k}`, 'falta o contexto e o plano'];
   if (!r['implementacao.md']) return [`/implementar-card ${k}`, 'o plano ainda não foi implementado'];
@@ -57,7 +84,11 @@ export function proximoPasso(s) {
   if (!aud || !aud.vale) return [`/auditar-codigo ${k}`, aud ? 'entrou commit depois da última auditoria' : 'ainda não foi auditado'];
   if (aud.veredito !== 'LIBERADO') return [`/implementar-card ${k}`, 'a auditoria bloqueou'];
   if (s.atras > 0) return [`/auditar-codigo ${k}`, `a main andou ${s.atras} commit(s) depois da auditoria`];
+  if (pr?.state === 'MERGED') {
+    return [`/publicar-pr ${k}`, `revisado e auditado; o PR #${pr.number} já foi mesclado, falta um PR novo`];
+  }
   if (!pr || pr.state === 'CLOSED') return [`/publicar-pr ${k}`, 'revisado e auditado, falta o PR'];
   if (s.faltaEnviar > 0) return [`/publicar-pr ${k}`, 'há commits locais que ainda não foram para o PR'];
-  return [null, `PR #${pr.number} aberto: aguardando teste e merge. Depois do merge: /encerrar-card ${k}`];
+  return [null, `PR #${pr.number} aberto: aguardando teste e merge. Depois do merge: /encerrar-card ${k}. `
+    + `Se o PR for parcial, não encerre: volte o card para "${STATUS.fazendo}" e siga com /implementar-card ${k}`];
 }
