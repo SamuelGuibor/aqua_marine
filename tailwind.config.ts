@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 // Caminho relativo: o alias @/ não vale no arquivo de configuração.
 import { cores, raios, tamanhosDeFonte } from "./lib/tema/tokens";
+import { utilitarios } from "./lib/tema/utilitarios";
 
 const config: Config = {
   content: [
@@ -42,6 +43,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [utilitarios],
 };
 export default config;
