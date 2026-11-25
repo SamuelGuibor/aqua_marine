@@ -27,14 +27,41 @@ iniciado por um comando que leva a chave do card. No fim de cada fase o Claude d
 | 4 | `/revisar-card SCRUM-12` | Confere critério por critério se o feito é o pedido, nem menos nem mais. Não corrige | `.card/revisao.md` (`APROVADO` / `AJUSTES`) | |
 | 5 | `/auditar-codigo SCRUM-12` | Main à frente/atrás, conflitos, build, segredos, banco, Next 16, lacunas, quem mais usa o que mudou | `.card/auditoria.md` (`LIBERADO` / `BLOQUEADO`) | |
 | 6 | `/publicar-pr SCRUM-12` | `git push`, abre o PR para a `main` com roteiro de teste | o PR | "Testes" + link do PR |
-| fim | `/encerrar-card SCRUM-12` | Depois do merge: remove worktree e branch, atualiza a `main` | | "Concluído" |
+| fim | `/encerrar-card SCRUM-12` | Depois do merge do PR que conclui o card: remove worktree e branch, atualiza a `main` | | "Concluído" |
 
 ### As voltas
 
 - Revisão deu `AJUSTES` ou auditoria deu `BLOQUEADO` → chat novo com `/implementar-card SCRUM-12`. Ele lê o relatório e corrige só as pendências.
 - **Todo commit novo invalida a revisão e a auditoria anteriores.** Depois de corrigir, as duas rodam de novo. O `status` mostra `DESATUALIZADO` e o `/publicar-pr` se recusa a seguir.
   (Exceção: o merge limpo da `main` feito pela própria auditoria não invalida a revisão.)
-- Pediram mudança no PR → `/implementar-card` → `/revisar-card` → `/auditar-codigo` → `/publicar-pr` (atualiza o mesmo PR).
+- Pediram mudança no PR → `/implementar-card` → `/revisar-card` → `/auditar-codigo` → `/publicar-pr` (com o PR ainda aberto,
+  atualiza o mesmo PR; PR já mesclado não é editado).
+
+### Entrega em partes
+
+Um card pode sair em mais de um PR, um por parte, na **mesma branch e worktree** (por exemplo, quando uma parte depende de outro card).
+
+1. **Registre a divisão** num comentário do card no Jira e em `.card/contexto.md` e `.card/plano.md`: quais critérios, ou pedaços
+   deles, entram em cada parte. Sem esse registro a revisão cobra todos os critérios.
+2. Cada parte passa por implementar → revisar → auditar → publicar. A revisão julga a parte da vez, pode dar `APROVADO` só para
+   ela e registra a situação de cada critério inteiro.
+3. O `/publicar-pr` avisa no corpo que o PR é **parcial** (não conclui o card), marca só os critérios completos e move o card
+   para "Testes". Mescle com **"Create a merge commit"**.
+4. Depois do merge de um PR parcial, **não rode `/encerrar-card`**: ele apaga a worktree e a `.card/` e move o card para
+   "Concluído". Volte o card para "Em andamento":
+
+   ```powershell
+   node scripts/harness/jira.mjs mover SCRUM-12 "Em andamento"
+   ```
+
+5. Quando der para fazer a parte seguinte, chat novo com `/implementar-card SCRUM-12`. Ela começa trazendo a `origin/main` para a
+   branch (`git merge origin/main`; deixe isso como primeiro passo da parte no plano) e termina num **PR novo**.
+6. O `/encerrar-card` é só depois do merge do PR que conclui o card.
+
+**O que o `status` sabe:** ele compara a branch com o que o último PR mesclado levou. Sem commit além disso (receber a `main`
+não conta), sugere `/encerrar-card`; com commit novo, volta ao fluxo normal até o `/publicar-pr`. Por isso, logo depois do merge
+de um PR parcial, antes do primeiro commit da parte seguinte, ele **ainda sugere encerrar**: não siga a sugestão. O `encerrar`
+(sem `--abandonar`) recusa apagar commit que não entrou em PR mesclado.
 
 ## CI
 
