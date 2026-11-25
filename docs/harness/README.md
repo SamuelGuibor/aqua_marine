@@ -36,6 +36,22 @@ iniciado por um comando que leva a chave do card. No fim de cada fase o Claude d
   (Exceção: o merge limpo da `main` feito pela própria auditoria não invalida a revisão.)
 - Pediram mudança no PR → `/implementar-card` → `/revisar-card` → `/auditar-codigo` → `/publicar-pr` (atualiza o mesmo PR).
 
+## CI
+
+Todo PR para a `main` e todo push na `main` disparam o GitHub Actions (`.github/workflows/ci.yml`), com quatro verificações separadas.
+Para repetir na sua máquina, rode na worktree o comando da verificação:
+
+| Verificação | Comando |
+| --- | --- |
+| `lint` | `npm run lint` |
+| `tipos` | `npm run tipos` |
+| `testes` | `npm test` (`npm run test:ver` fica observando) |
+| `build` | `npm run build` |
+
+- O CI roda **sem nenhum segredo e sem banco** (o único banco é o de produção): teste e build não podem depender de variável do `.env.local`.
+- Um push novo no PR cancela a execução anterior dele.
+- **O CI precisa estar verde antes de `/publicar-pr` pedir revisão.** Vermelho → chat novo com `/implementar-card SCRUM-12`.
+
 ## Regras de ouro
 
 1. **Um chat = uma fase de um card.** Terminou a fase, feche o chat e abra outro com o comando que o Claude indicou.
