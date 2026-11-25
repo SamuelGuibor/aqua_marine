@@ -1,0 +1,65 @@
+# Confere todo PR para a main e todo push na main. Guia: docs/harness/README.md, seção CI.
+# Roda sem nenhum segredo e sem banco: o único banco que existe é o de produção.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Push novo num PR cancela a execução anterior dele. Na main, cada commit roda até o fim.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+
+# Os nomes dos jobs são as verificações que aparecem no PR; a proteção da main vai exigi-los.
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - run: npm run lint
+
+  tipos:
+    name: tipos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - run: npm run tipos
+
+  testes:
+    name: testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - run: npm test
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar
+      - uses: actions/cache@v6
+        with:
+          path: .next/cache
+          # Chave nova quando mudam dependências ou fontes; sem acerto, reaproveita a última do mesmo lockfile.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.mjs', '**/*.css', '!node_modules/**') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+      - run: npm run build
