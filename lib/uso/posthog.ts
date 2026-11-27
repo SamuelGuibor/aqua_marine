@@ -7,6 +7,7 @@ const chave = process.env.NEXT_PUBLIC_POSTHOG_KEY || undefined;
 const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 
 let ligado = false;
+let ultimoCaminho: string | null = null;
 
 export function iniciarPosthog() {
   if (ligado || !chave || typeof window === "undefined") return;
@@ -35,6 +36,9 @@ export function registrarVisita(caminho: string) {
   if (!ligado) return;
   try {
     const so = caminho.split(/[?#]/)[0];
+    // Evita visita dupla (carga inicial + transição para o mesmo caminho, ou só a query mudou).
+    if (so === ultimoCaminho) return;
+    ultimoCaminho = so;
     posthog.capture("$pageview", { $current_url: window.location.origin + so, $pathname: so });
   } catch {
     // silencioso
