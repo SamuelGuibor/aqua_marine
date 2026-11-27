@@ -1,4 +1,7 @@
-import { withSentryConfig } from "@sentry/nextjs";
+// Na v11 o withSentryConfig fica em "@sentry/nextjs/config" (CommonJS: importação padrão).
+import sentryConfig from "@sentry/nextjs/config";
+
+const { withSentryConfig } = sentryConfig;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
