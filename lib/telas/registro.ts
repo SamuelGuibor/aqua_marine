@@ -26,6 +26,12 @@ export const TELAS = {
     naoRola: ["pc", "tablet-h", "tablet-v", "rh-tablet"],
     excecoesDeToque: [],
   },
+  // Páginas de erro (app/error.tsx, app/global-error.tsx) e de não encontrado (app/not-found.tsx).
+  erro: {
+    estados: ["erro", "nao-encontrado"],
+    naoRola: ["pc", "tablet-h", "tablet-v", "rh-tablet"],
+    excecoesDeToque: [],
+  },
 } as const satisfies Record<string, Tela>;
 
 export type NomeDeTela = keyof typeof TELAS;
