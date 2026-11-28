@@ -6,6 +6,7 @@
 | `sintese/modelo-de-dados-e-back.md` | Síntese de dados e back-end: tabelas, regras de negócio (`lib/dominio/`), API, tempo real, offline e ordem das migrations. |
 | `sintese/arquitetura-front.md` | Síntese de front: tokens, componentes, cortes de largura, rotas e o que cada tela usa. |
 | `mapa/*.md` | Um mapa por família de tela do protótipo (19 arquivos): o que a tela mostra, os estados, os números de exemplo e as larguras. `mapa/briefing-escopo.md` é o diagnóstico da fábrica. |
+| `registro-de-acoes.md` | Registro de ações (quem fez o quê): `registrarAcao` dentro da transação, nomes de ação, o que nunca vai em `antes`/`depois`, leitura paginada. |
 | `harness/` | O fluxo de cards (`README.md`) e o modelo de card. |
 
 ## Como os cards citam estes documentos
