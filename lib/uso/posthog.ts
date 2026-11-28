@@ -15,6 +15,9 @@ export function iniciarPosthog() {
     posthog.init(chave, {
       api_host: host,
       autocapture: false,
+      capture_dead_clicks: false,
+      capture_performance: false,
+      capture_exceptions: false,
       capture_pageview: false,
       capture_pageleave: false,
       disable_session_recording: true,
