@@ -2,31 +2,16 @@
 // restrições pedidas pelos cards. Não usa o Neon: roda no CI, que não tem banco.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import * as schema from "./schema";
+import {
+  PASTA_MIGRATIONS as PASTA,
+  aplicarMigrations,
+  arquivosDeMigration,
+  novoBancoDeTeste,
+} from "./pglite-teste";
 import { type Escrita, semearBanco } from "./semear";
 
-const PASTA = join(__dirname, "migrations");
-const pg = new PGlite();
-const db = drizzle(pg, { schema });
-
-function arquivosDeMigration(): string[] {
-  const jornal = JSON.parse(
-    readFileSync(join(PASTA, "meta", "_journal.json"), "utf8"),
-  ) as { entries: { tag: string }[] };
-  return jornal.entries.map((e) => `${e.tag}.sql`);
-}
-
-async function aplicarMigrations() {
-  for (const arquivo of arquivosDeMigration()) {
-    const texto = readFileSync(join(PASTA, arquivo), "utf8");
-    for (const comando of texto.split("--> statement-breakpoint")) {
-      if (comando.trim()) await pg.exec(comando);
-    }
-  }
-}
+const { pg, db } = novoBancoDeTeste();
 
 const semear = () =>
   semearBanco(db as unknown as Escrita, {
@@ -52,7 +37,7 @@ let tabletTes: string;
 let jornadaInj: string;
 
 beforeAll(async () => {
-  await aplicarMigrations();
+  await aplicarMigrations(pg);
   await semear();
   const { id: admin } = await um<{ id: string }>(
     "select id from usuario where papel = 'admin'",
